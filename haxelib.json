@@ -11,6 +11,7 @@
 	"version": "1.2.2",
 	"releasenote": "Fix compilation for OpenFL 4+ on iOS",
 	"contributors": [
+		"MAJigsaw77",
 		"singmajesty",
 		"fbricker"
 	],
