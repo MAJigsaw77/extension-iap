@@ -1,7 +1,6 @@
 package org.haxe.extension;
 
 import android.util.Log;
-import android.util.Base64;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
@@ -14,15 +13,14 @@ import org.haxe.extension.util.BillingManager.BillingUpdatesListener;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import org.json.JSONArray;
-import org.json.Exception;
 import org.json.JSONObject;
+import org.json.JSONException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.charset.StandardCharsets;
 
-public class InAppPurchase extends Extension
+public class IAP extends Extension
 {
 	private static class UpdateListener implements BillingUpdatesListener
 	{
@@ -42,7 +40,7 @@ public class InAppPurchase extends Extension
 			if (result.getResponseCode() == BillingResponseCode.OK)
 				callback.call("onConsume", new Object[] { purchase.getOriginalJson() });
 			else
-				callback.call("onFailedConsume", new Object[] { ("{\"result\":" + result + ", \"product\":" + purchase.getOriginalJson() + "}") });
+				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
 		}
 
 		@Override
@@ -55,7 +53,7 @@ public class InAppPurchase extends Extension
 			if (result.getResponseCode() == BillingResponseCode.OK)
 				callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson() });
 			else
-				callback.call("onFailedAcknowledgePurchase", new Object[] { ("{\"result\":" + result + ", \"product\":" + purchase.getOriginalJson() + "}") });
+				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
 		}
 
 		@Override
@@ -74,81 +72,144 @@ public class InAppPurchase extends Extension
 				if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
 					callback.call("onCanceledPurchase", new Object[] { "Canceled" });
 				else
-					callback.call("onFailedPurchase", new Object[] { "{\"result\":{\"message\":\"" + result + "\"}}" });
+					callback.call("onFailedPurchase", new Object[] { createFailureJson(result) });
 			}
 		}
 
 		@Override
 		public void onQuerySkuDetailsFinished(List<ProductDetails> skuList, final BillingResult result)
 		{
-			if (result.getResponseCode() == BillingResponseCode.OK) {
-				String jsonResp =  "{ \"products\":[ ";
+			if (result.getResponseCode() == BillingResponseCode.OK)
+			{
+				JSONArray productsArray = new JSONArray();
+
 				for (ProductDetails sku : skuList)
+					productsArray.put(productDetailsToJson(sku));
+
+				JSONObject jsonResp = new JSONObject();
+
+				try
 				{
-					jsonResp += productDetailsToJson(sku) + ",";
+					jsonResp.put("products", productsArray);
 				}
-				jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-				jsonResp += "]}";
-				callback.call("onRequestProductDataComplete", new Object[] { jsonResp });
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+
+				callback.call("onRequestProductDataComplete", new Object[] { jsonResp.toString() });
 			}
 			else
 				callback.call("onRequestProductDataComplete", new Object[] { "Failure" });
 		}
 
 		@Override
-		public void onQueryPurchasesFinished(List<Purchase> purchaseList) {
-			String jsonResp =  "{ \"purchases\":[ ";
-			for (Purchase purchase : purchaseList) {
-				if(purchase.getPurchaseState() == PurchaseState.PURCHASED) {
-					for(String sku : purchase.getSkus()){
-						jsonResp += "{" +
-								"\"key\":\"" + sku +"\", " +
-								"\"value\":" + purchase.getOriginalJson() + "," + 
-								"\"itemType\":\"\"," +
-								"\"signature\":\"" + purchase.getSignature() + "\"},";
+		public void onQueryPurchasesFinished(List<Purchase> purchaseList)
+		{
+			JSONArray purchasesArray = new JSONArray();
+
+			for (Purchase purchase : purchaseList)
+			{
+				if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+				{
+					for(String sku : purchase.getSkus())
+					{
+						JSONObject purchaseJson = new JSONObject();
+
+						try {
+							purchaseJson.put("key", sku);
+							purchaseJson.put("value", new JSONObject(purchase.getOriginalJson()));
+							purchaseJson.put("itemType", "");
+							purchaseJson.put("signature", purchase.getSignature());
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+
+						purchasesArray.put(purchaseJson);
 					}
 				}
 			}
-			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-			jsonResp += "]}";
-			Log.e(TAG, "onQueryPurchasesFinished: " + jsonResp);
-			callback.call("onQueryInventoryComplete", new Object[] { jsonResp });
+
+			JSONObject jsonResp = new JSONObject();
+
+			try {
+				jsonResp.put("purchases", purchasesArray);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			callback.call("onQueryInventoryComplete", new Object[] { jsonResp.toString() });
 		}
 
-		public JSONObject productDetailsToJson(ProductDetails productDetails) {
+		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
+		{
+			JSONObject errorJson = new JSONObject();
 
-			JSONObject resultObject = null;
-	
 			try {
-	
-				resultObject = new JSONObject();
+				errorJson.put("result", result.getResponseCode());
+				errorJson.put("product", new JSONObject(purchase.getOriginalJson()));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return errorJson;
+		}
+
+		private JSONObject createFailureJson(BillingResult result)
+		{
+			JSONObject failureJson = new JSONObject();
+
+			try {
+				failureJson.put("result", new JSONObject().put("message", result.getResponseCode()));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return failureJson;
+		}
+
+		public JSONObject productDetailsToJson(ProductDetails productDetails)
+		{
+			JSONObject resultObject = new JSONObject();
+
+			try
+			{
 				resultObject.put("productId", productDetails.getProductId());
 				resultObject.put("type", productDetails.getProductType());
 				resultObject.put("title", productDetails.getTitle());
 				resultObject.put("name", productDetails.getName());
 				resultObject.put("description", productDetails.getDescription());
+
 				ProductDetails.OneTimePurchaseOfferDetails purchaseOfferDetails = productDetails.getOneTimePurchaseOfferDetails();
-				if(purchaseOfferDetails != null) {
+
+				if (purchaseOfferDetails != null)
+				{
 					resultObject.put("price", purchaseOfferDetails.getFormattedPrice());
 					resultObject.put("price_amount_micros", purchaseOfferDetails.getPriceAmountMicros());
 					resultObject.put("price_currency_code", purchaseOfferDetails.getPriceCurrencyCode());
 				}
-	
+
 				List<ProductDetails.SubscriptionOfferDetails> subscriptionOfferDetailsList = productDetails.getSubscriptionOfferDetails();
-				if(subscriptionOfferDetailsList != null) {
+
+				if (subscriptionOfferDetailsList != null)
+				{
 					JSONArray offersArray = new JSONArray();
-	
-					for (ProductDetails.SubscriptionOfferDetails offerDetails : subscriptionOfferDetailsList) {
+
+					for (ProductDetails.SubscriptionOfferDetails offerDetails : subscriptionOfferDetailsList)
+					{
 						JSONObject offerJson = new JSONObject();
+
 						if(offerDetails.getOfferId() != null)
 							offerJson.put("offerId", offerDetails.getOfferId());
+
 						offerJson.put("basePlanId", offerDetails.getBasePlanId());
 						offerJson.put("offerTags", new JSONArray(offerDetails.getOfferTags()));
 						offerJson.put("offerToken", offerDetails.getOfferToken());
-	
+
 						JSONArray pricingPhases = new JSONArray();
-	
-						for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList()) {
+
+						for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList())
+						{
 							JSONObject phaseJson = new JSONObject();
 							phaseJson.put("billingCycleCount", pricingPhase.getBillingCycleCount());
 							phaseJson.put("billingPeriod", pricingPhase.getBillingPeriod());
@@ -158,17 +219,16 @@ public class InAppPurchase extends Extension
 							phaseJson.put("recurrenceMode", pricingPhase.getRecurrenceMode());
 							pricingPhases.put(phaseJson);
 						}
-						offerJson.put("pricingPhases", pricingPhases);
-	
-						offersArray.put(offerJson);
 
+						offerJson.put("pricingPhases", pricingPhases);
+
+						offersArray.put(offerJson);
 					}
 
 					resultObject.put("subscriptionOffers", offersArray);
-
 				}
 			}
-			catch (Exception e)
+			catch (JSONException e)
 			{
 				e.printStackTrace();
 			}
@@ -196,7 +256,7 @@ public class InAppPurchase extends Extension
 			}
 		});
 	}
-	
+
 	public static void consume(final String purchaseJson, final String signature) 
 	{
 		try
@@ -241,8 +301,9 @@ public class InAppPurchase extends Extension
 	{
 		setPublicKey(publicKey);
 
+		IAP.callback = callback;
+
 		updateListener = new UpdateListener();
-		callback = callback;
 		billingManager = new BillingManager(Extension.mainActivity, updateListener);
 	}
 
