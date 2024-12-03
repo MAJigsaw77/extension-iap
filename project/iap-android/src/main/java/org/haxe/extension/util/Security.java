@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.haxe.extension.iap.util;
+package org.haxe.extension.util;
 
 import android.text.TextUtils;
 import android.util.Base64;
