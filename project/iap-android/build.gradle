@@ -11,7 +11,7 @@ dependencies
 {
 	implementation project(':deps:extension-api')
 
-	implementation('com.android.billingclient:billing:6.0.0')
+	implementation('com.android.billingclient:billing:7.1.1')
 	{
 		exclude group: 'org.jetbrains.kotlin'
 		exclude module: 'kotlin-stdlib'
