@@ -9,6 +9,14 @@ class IAPAndroid
 {
 	public static var onStarted:Event<Bool->Void> = new Event<Bool->Void>();
 	public static var onConsume:Event<String->Void> = new Event<String->Void>();
+	public static var onFailedConsume:Event<String->Void> = new Event<String->Void>();
+	public static var onAcknowledgePurchase:Event<String->Void> = new Event<String->Void>();
+	public static var onFailedAcknowledgePurchase:Event<String->Void> = new Event<String->Void>();
+	public static var onPurchase:Event<String->String-> Void> = new Event<String->String->Void>();
+	public static var onCanceledPurchase:Event<String->Void> = new Event<String->Void>();
+	public static var onFailedPurchase:Event<String->Void> = new Event<String->Void>();
+	public static var onRequestProductDataComplete:Event<String->Void> = new Event<String->Void>();
+	public static var onQueryPurchasesFinished:Event<String->Void> = new Event<String->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
@@ -68,85 +76,59 @@ class IAPAndroid
 	}
 }
 
-/**
- * Internal callback handler for AdMob events.
- */
 @:noCompletion
 private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.JNISafety #end
 {
 	public function new():Void {}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onStarted(status:Bool):Void
+	@:keep @:runOnMainThread public function onStarted(status:Bool):Void
 	{
-		if (IAPAndroid.onStarted != null)
-			IAPAndroid.onStarted(status);
+		IAPAndroid.onStarted.dispatch(status);
 	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onConsume(purchase:String):Void
+	@:keep @:runOnMainThread public function onConsume(purchase:String):Void
 	{
-		if (IAPAndroid.onConsume != null)
-		{
-			final purchaseJson:Dynamic = haxe.Json.parse(purchase);
-
-			if (purchaseJson != null && Reflect.hasField(purchaseJson, 'productId'))
-				IAPAndroid.onConsume(Reflect.field(purchaseJson, 'productId'));
-		}
+		IAPAndroid.onConsume.dispatch(purchase);
 	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onFailedConsume(error:String):Void {}
+	@:keep @:runOnMainThread public function onFailedConsume(error:String):Void
+	{
+		IAPAndroid.onFailedConsume.dispatch(error);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onAcknowledgePurchase(purchase:String):Void {}
+	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String):Void
+	{
+		IAPAndroid.onAcknowledgePurchase.dispatch(purchase);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onFailedAcknowledgePurchase(error:String):Void {}
+	@:keep @:runOnMainThread public function onFailedAcknowledgePurchase(error:String):Void
+	{
+		IAPAndroid.onFailedAcknowledgePurchase.dispatch(error);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onPurchase(purchase:String, signature:String):Void {}
+	@:keep @:runOnMainThread public function onPurchase(purchase:String, signature:String):Void
+	{
+		IAPAndroid.onPurchase.dispatch(purchase, signature);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onCanceledPurchase(reason:String):Void {}
+	@:keep @:runOnMainThread public function onCanceledPurchase(reason:String):Void
+	{
+		IAPAndroid.onCanceledPurchase.dispatch(reason);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onFailedPurchase(error:String):Void {}
+	@:keep @:runOnMainThread public function onFailedPurchase(error:String):Void
+	{
+		IAPAndroid.onFailedPurchase.dispatch(error);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onRequestProductDataComplete(result:String):Void {}
+	@:keep @:runOnMainThread public function onRequestProductDataComplete(result:String):Void
+	{
+		IAPAndroid.onRequestProductDataComplete.dispatch(result);
+	}
 
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onQueryPurchasesFinished(result:String):Void {}
+	@:keep @:runOnMainThread public function onQueryPurchasesFinished(result:String):Void
+	{
+		IAPAndroid.onQueryPurchasesFinished.dispatch(result);
+	}
 }
 #end
