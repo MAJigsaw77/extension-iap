@@ -34,7 +34,7 @@ class IAPAndroid
 		JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;Ljava/lang/String;)V')(productID, devPayload);
 	}
 
-	public static function acknowledgePurchase(purchaseJson:String, signature:String):Void
+	public static function acknowledgePurchase(purchase:String, signature:String):Void
 	{
 		if (!initialized)
 		{
@@ -42,7 +42,7 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchaseJson, signature);
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase, signature);
 	}
 
 	public static function querySkuDetails(ids:Array<String>):Void
