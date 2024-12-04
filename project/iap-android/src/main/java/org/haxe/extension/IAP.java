@@ -255,7 +255,7 @@ public class IAP extends Extension
 		billingManager = new BillingManager(Extension.mainActivity, updateListener);
 	}
 
-	public static void buy(final String productID, final String devPayload)
+	public static void purchase(final String productID, final String devPayload)
 	{
 		Extension.mainActivity.runOnUiThread(new Runnable()
 		{
