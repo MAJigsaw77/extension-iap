@@ -64,7 +64,7 @@ public class IAP extends Extension
 				for (Purchase purchase : purchaseList) 
 				{
 					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
-						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), "", purchase.getSignature() });
+						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				}
 			}
 			else
