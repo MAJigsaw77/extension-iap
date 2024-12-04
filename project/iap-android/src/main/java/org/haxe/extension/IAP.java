@@ -27,7 +27,7 @@ public class IAP extends Extension
 		@Override
 		public void onBillingClientSetupFinished(final Boolean success)
 		{
-			callback.call("onStarted", new Object[] { success ? "Success" : "Failure" });
+			callback.call("onStarted", new Object[] { success });
 		}
 
 		@Override
