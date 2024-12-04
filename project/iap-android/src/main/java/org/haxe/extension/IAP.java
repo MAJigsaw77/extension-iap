@@ -1,6 +1,5 @@
 package org.haxe.extension;
 
-import android.util.Log;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
