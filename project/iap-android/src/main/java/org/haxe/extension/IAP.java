@@ -81,15 +81,15 @@ public class IAP extends Extension
 		{
 			if (result.getResponseCode() == BillingResponseCode.OK)
 			{
-				JSONArray productsArray = new JSONArray();
-
-				for (ProductDetails sku : skuList)
-					productsArray.put(productDetailsToJson(sku));
-
 				JSONObject jsonResp = new JSONObject();
 
 				try
 				{
+					JSONArray productsArray = new JSONArray();
+
+					for (ProductDetails sku : skuList)
+						productsArray.put(productDetailsToJson(sku));
+
 					jsonResp.put("products", productsArray);
 				}
 				catch (JSONException e)
@@ -119,7 +119,6 @@ public class IAP extends Extension
 						try {
 							purchaseJson.put("key", sku);
 							purchaseJson.put("value", new JSONObject(purchase.getOriginalJson()));
-							purchaseJson.put("itemType", "");
 							purchaseJson.put("signature", purchase.getSignature());
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -175,7 +174,7 @@ public class IAP extends Extension
 			try
 			{
 				resultObject.put("productId", productDetails.getProductId());
-				resultObject.put("type", productDetails.getProductType());
+				resultObject.put("productType", productDetails.getProductType());
 				resultObject.put("title", productDetails.getTitle());
 				resultObject.put("name", productDetails.getName());
 				resultObject.put("description", productDetails.getDescription());
@@ -184,9 +183,9 @@ public class IAP extends Extension
 
 				if (purchaseOfferDetails != null)
 				{
-					resultObject.put("price", purchaseOfferDetails.getFormattedPrice());
-					resultObject.put("price_amount_micros", purchaseOfferDetails.getPriceAmountMicros());
-					resultObject.put("price_currency_code", purchaseOfferDetails.getPriceCurrencyCode());
+					resultObject.put("formattedPrice", purchaseOfferDetails.getFormattedPrice());
+					resultObject.put("priceAmountMicros", purchaseOfferDetails.getPriceAmountMicros());
+					resultObject.put("priceCurrencyCode", purchaseOfferDetails.getPriceCurrencyCode());
 				}
 
 				List<ProductDetails.SubscriptionOfferDetails> subscriptionOfferDetailsList = productDetails.getSubscriptionOfferDetails();
@@ -247,9 +246,10 @@ public class IAP extends Extension
 
 	public static void init(String publicKey, HaxeObject callback)
 	{
-		setPublicKey(publicKey);
-
 		IAP.callback = callback;
+		IAP.publicKey = publicKey;
+
+		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
 
 		updateListener = new UpdateListener();
 		billingManager = new BillingManager(Extension.mainActivity, updateListener);
@@ -310,18 +310,6 @@ public class IAP extends Extension
 	public static void queryInventory()
 	{
 		billingManager.queryPurchases();
-	}
-
-	public static void setPublicKey(String s)
-	{
-		publicKey = s;
-
-		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
-	}
-
-	public static String getPublicKey()
-	{
-		return publicKey;
 	}
 
 	@Override
