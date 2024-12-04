@@ -5,7 +5,21 @@ import admob.android.util.JNICache;
 import lime.app.Event;
 import lime.utils.Log;
 
-class IAPAndroid {}
+class IAPAndroid
+{
+	@:noCompletion
+	private static var initialized:Bool = false;
+
+	public static function init(publicKey:String):Void
+	{
+		if (initialized)
+			return;
+
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'init', '(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V')(publicKey, new CallBackHandler());
+
+		initialized = true;
+	}
+}
 
 /**
  * Internal callback handler for AdMob events.
