@@ -245,6 +245,16 @@ public class IAP extends Extension
 	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
 	private static Map<String, Purchase> acknowledgePurchaseInProgress = new HashMap<String, Purchase>();
 
+	public static void init(String publicKey, HaxeObject callback)
+	{
+		setPublicKey(publicKey);
+
+		IAP.callback = callback;
+
+		updateListener = new UpdateListener();
+		billingManager = new BillingManager(Extension.mainActivity, updateListener);
+	}
+
 	public static void buy(final String productID, final String devPayload)
 	{
 		Extension.mainActivity.runOnUiThread(new Runnable()
@@ -295,16 +305,6 @@ public class IAP extends Extension
 	public static void querySkuDetails(String[] ids)
 	{
 		billingManager.querySkuDetailsAsync(ProductType.INAPP, Arrays.asList(ids));
-	}
-
-	public static void initialize(String publicKey, HaxeObject callback)
-	{
-		setPublicKey(publicKey);
-
-		IAP.callback = callback;
-
-		updateListener = new UpdateListener();
-		billingManager = new BillingManager(Extension.mainActivity, updateListener);
 	}
 
 	public static void queryInventory()
