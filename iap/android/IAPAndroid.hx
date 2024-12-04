@@ -147,6 +147,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onQueryInventoryComplete(result:String):Void {}
+	public function onQueryPurchasesFinished(result:String):Void {}
 }
 #end

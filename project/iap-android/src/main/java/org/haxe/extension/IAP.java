@@ -137,7 +137,7 @@ public class IAP extends Extension
 				e.printStackTrace();
 			}
 
-			callback.call("onQueryInventoryComplete", new Object[] { jsonResp.toString() });
+			callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
 		}
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
