@@ -22,6 +22,50 @@ class IAPAndroid
 
 		initialized = true;
 	}
+
+	public static function purchase(productID:String, devPayload:String):Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;Ljava/lang/String;)V')(productID, devPayload);
+	}
+
+	public static function acknowledgePurchase(purchaseJson:String, signature:String):Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchaseJson, signature);
+	}
+
+	public static function querySkuDetails(ids:Array<String>):Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySkuDetails', '([Ljava/lang/String;)V')(ids);
+	}
+
+	public static function queryInventory():Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInventory', '()V')();
+	}
 }
 
 /**
@@ -36,7 +80,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onStarted(status:Bool):Void 
+	public function onStarted(status:Bool):Void
 	{
 		if (IAPAndroid.onStarted != null)
 			IAPAndroid.onStarted(status);
