@@ -105,9 +105,9 @@ public class IAP extends Extension
 					for (String sku : purchase.getSkus())
 					{
 						JSONObject purchaseJson = new JSONObject();
-						purchaseJson.put("key", sku);
-						purchaseJson.put("value", new JSONObject(purchase.getOriginalJson()));
-						purchaseJson.put("signature", purchase.getSignature());
+						purchaseJson.put("sku", sku);
+						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+						purchaseJson.put("signature", purchase.getSignature())
 						purchasesArray.put(purchaseJson);
 					}
 				}
