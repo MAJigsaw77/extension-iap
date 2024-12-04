@@ -7,6 +7,9 @@ import lime.utils.Log;
 
 class IAPAndroid
 {
+	public static var onStarted:Event<Bool->Void> = new Event<Bool->Void>();
+	public static var onConsume:Event<String->Void> = new Event<String->Void>();
+
 	@:noCompletion
 	private static var initialized:Bool = false;
 
@@ -33,13 +36,26 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onStarted(status:String):Void {}
+	public function onStarted(status:Bool):Void 
+	{
+		if (IAPAndroid.onStarted != null)
+			IAPAndroid.onStarted(status);
+	}
 
 	@:keep
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onConsume(purchase:String):Void {}
+	public function onConsume(purchase:String):Void
+	{
+		if (IAPAndroid.onConsume != null)
+		{
+			final purchaseJson:Dynamic = haxe.Json.parse(purchase);
+
+			if (purchaseJson != null && Reflect.hasField(purchaseJson, 'productId'))
+				IAPAndroid.onConsume(Reflect.field(purchaseJson, 'productId'));
+		}
+	}
 
 	@:keep
 	#if (lime >= "8.0.0")
@@ -63,7 +79,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onPurchase(purchase:String, data:String, signature:String):Void {}
+	public function onPurchase(purchase:String, signature:String):Void {}
 
 	@:keep
 	#if (lime >= "8.0.0")
