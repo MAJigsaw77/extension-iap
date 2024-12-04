@@ -11,7 +11,7 @@ class IAPPurchase
 	public var name:String = '';
 	public var description:String = '';
 	public var formattedPrice:Null<String> = null;
-	public var priceAmountMicros:Null<String> = null;
+	public var priceAmountMicros:Float = 0.0;
 	public var priceCurrencyCode:Null<String> = null;
 	public var subscriptionOffers:Array<IAPSubscriptionOffer> = [];
 
