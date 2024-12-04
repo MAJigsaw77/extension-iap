@@ -102,10 +102,10 @@ public class IAP extends Extension
 			{
 				if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
 				{
-					for (String sku : purchase.getSkus())
+					for (String key : purchase.getSkus())
 					{
 						JSONObject purchaseJson = new JSONObject();
-						purchaseJson.put("sku", sku);
+						purchaseJson.put("key", key);
 						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
 						purchaseJson.put("signature", purchase.getSignature())
 						purchasesArray.put(purchaseJson);
