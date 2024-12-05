@@ -2,9 +2,12 @@ package iap.android;
 
 #if android
 import iap.android.util.JNICache;
+import iap.IAPProductDetails;
+import iap.IAPPurchase;
 import lime.app.Event;
 import lime.utils.Log;
 
+@:nullSafety
 class IAPAndroid
 {
 	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
@@ -35,7 +38,7 @@ class IAPAndroid
 		initialized = true;
 	}
 
-	public static function purchase(productID:String):Void
+	public static function purchase(productDetails:IAPProductDetails):Void
 	{
 		if (!initialized)
 		{
@@ -43,10 +46,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;)V')(productID);
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;)V')(productDetails.productId);
 	}
 
-	public static function consume(purchaseJson:String, signature:String):Void
+	public static function consume(purchase:IAPPurchase):Void
 	{
 		if (!initialized)
 		{
@@ -54,10 +57,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'consume', '(Ljava/lang/String;Ljava/lang/String;)V')(purchaseJson, signature);
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'consume', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase.stringifyedJson, purchase.signature);
 	}
 
-	public static function acknowledgePurchase(purchaseJson:String, signature:String):Void
+	public static function acknowledgePurchase(purchase:IAPPurchase):Void
 	{
 		if (!initialized)
 		{
@@ -65,7 +68,7 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchaseJson, signature);
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase.stringifyedJson, purchase.signature);
 	}
 
 	public static function queryProductDetails(ids:Array<String>):Void
