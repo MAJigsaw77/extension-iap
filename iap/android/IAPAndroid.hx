@@ -85,12 +85,15 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 {
 	public function new():Void {}
 
-	@:keep @:runOnMainThread public function onStarted(status:Bool):Void
+	@:keep
+	@:runOnMainThread
+	public function onStarted(status:Bool):Void
 	{
 		IAPAndroid.onStarted.dispatch(status);
 	}
 
-	@:keep @:runOnMainThread public function onConsume(purchase:String, signature:String):Void
+	@:keep
+	@:runOnMainThread public function onConsume(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onConsume.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
