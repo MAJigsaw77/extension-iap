@@ -2,7 +2,7 @@ package;
 
 class Main extends lime.app.Application
 {
-	private static final PUBLIC_KEY:String = "";
+	private static final PUBLIC_KEY:String = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2pAdZ0dPy0sr/75E7U4oSYzDLZ7/Vn8YcfR6SN7R60Ew6chHTzRDWxr2XKjgjs3DixwFgcd5YAEv4zWcQfZSSwrOdjycF/5TUAbbfESWAZgB9UDz0NLl5KXaf+HitTlyshAG";
 
 	public function new():Void
 	{
