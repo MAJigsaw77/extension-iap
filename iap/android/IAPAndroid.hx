@@ -90,8 +90,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		IAPAndroid.onStarted.dispatch(status);
 	}
 
-
-
 	@:keep @:runOnMainThread public function onConsume(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onConsume.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
@@ -105,8 +103,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
 
-
-
 	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onAcknowledgePurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
@@ -119,8 +115,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		if (error != null)
 			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
-
-
 
 	@:keep @:runOnMainThread public function onPurchase(purchase:String, signature:String):Void
 	{
@@ -139,8 +133,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		if (error != null)
 			IAPAndroid.onFailedPurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
-
-
 
 	@:keep @:runOnMainThread public function onQueryProductDetailsFinished(result:String):Void
 	{
