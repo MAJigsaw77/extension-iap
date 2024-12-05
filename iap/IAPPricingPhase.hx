@@ -3,24 +3,20 @@ package iap;
 @:nullSafety
 class IAPPricingPhase
 {
-	public var billingCycleCount:Int = 0;
-	public var billingPeriod:String = '';
-	public var formattedPrice:String = '';
-	public var priceAmountMicros:String = '';
-	public var priceCurrencyCode:String = '';
-	public var recurrenceMode:Int = 0;
+	public final billingCycleCount:Int;
+	public final billingPeriod:String;
+	public final formattedPrice:String;
+	public final priceAmountMicros:String;
+	public final priceCurrencyCode:String;
+	public final recurrenceMode:Int;
 
-	public function new():Void {}
-
-	public static function fromJson(json:Dynamic):IAPPricingPhase
+	public function new(json:Dynamic):Void
 	{
-		final phase:IAPPricingPhase = new IAPPricingPhase();
-		phase.billingCycleCount = json.billingCycleCount;
-		phase.billingPeriod = json.billingPeriod;
-		phase.formattedPrice = json.formattedPrice;
-		phase.priceAmountMicros = json.priceAmountMicros;
-		phase.priceCurrencyCode = json.priceCurrencyCode;
-		phase.recurrenceMode = json.recurrenceMode;
-		return phase;
+		billingCycleCount = json.billingCycleCount;
+		billingPeriod = json.billingPeriod;
+		formattedPrice = json.formattedPrice;
+		priceAmountMicros = json.priceAmountMicros;
+		priceCurrencyCode = json.priceCurrencyCode;
+		recurrenceMode = json.recurrenceMode;
 	}
 }
