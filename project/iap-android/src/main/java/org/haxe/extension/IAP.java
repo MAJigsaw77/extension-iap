@@ -104,7 +104,7 @@ public class IAP extends Extension
 				{
 					JSONObject purchaseJson = new JSONObject();
 					purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-					purchaseJson.put("signature", purchase.getSignature())
+					purchaseJson.put("signature", purchase.getSignature());
 					purchasesArray.put(purchaseJson);
 				}
 			}
@@ -118,7 +118,7 @@ public class IAP extends Extension
 		{
 			JSONObject purchaseJson = new JSONObject();
 			purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-			purchaseJson.put("signature", purchase.getSignature())
+			purchaseJson.put("signature", purchase.getSignature());
 
 			JSONObject errorJson = new JSONObject();
 			errorJson.put("result", result.getResponseCode());
