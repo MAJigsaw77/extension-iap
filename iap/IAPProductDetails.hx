@@ -28,8 +28,8 @@ class IAPProductDetails
 
 		if (json.subscriptionOffers != null)
 		{
-			for (offerJson in json.subscriptionOffers)
-				subscriptionOffers.push(IAPSubscriptionOffer.fromJson(offerJson));
+			for (offerJson in (json.subscriptionOffers : Array<Dynamic>))
+				subscriptionOffers.push(new IAPSubscriptionOffer(offerJson));
 		}
 		else
 			subscriptionOffers = [];
