@@ -20,11 +20,13 @@ import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.Purchase.PurchasesResult;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +65,17 @@ public class BillingManager implements PurchasesUpdatedListener
 		mBillingUpdatesListener = updatesListener;
 		mBillingClient = BillingClient.newBuilder(mActivity).enablePendingPurchases().setListener(this).build();
 	}
+
+    public void destroy()
+	{
+        Log.d(TAG, "Destroying the billing manager.");
+
+        if (mBillingClient != null && mBillingClient.isReady())
+		{
+            mBillingClient.endConnection();
+            mBillingClient = null;
+        }
+    }
 
 	@Override
 	public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
@@ -178,7 +191,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeConsumed == null)
 		{
 			Log.d(TAG, "mTokensToBeConsumed is null, initializing new HashSet");
-			mTokensToBeConsumed = new Set<String>();
+			mTokensToBeConsumed = new HashSetString>();
 		}
 		else if (mTokensToBeConsumed.contains(purchaseToken))
 		{
@@ -223,7 +236,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeAcknowledged == null)
 		{
 			Log.d(TAG, "mTokensToBeAcknowledged is null, initializing new HashSet");
-			mTokensToBeAcknowledged = new Set<String>();
+			mTokensToBeAcknowledged = new HashSetString>();
 		}
 		else if (mTokensToBeAcknowledged.contains(purchaseToken))
 		{
