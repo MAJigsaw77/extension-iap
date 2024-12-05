@@ -66,16 +66,16 @@ public class BillingManager implements PurchasesUpdatedListener
 		mBillingClient = BillingClient.newBuilder(mActivity).enablePendingPurchases().setListener(this).build();
 	}
 
-    public void destroy()
+	public void destroy()
 	{
-        Log.d(TAG, "Destroying the billing manager.");
+		Log.d(TAG, "Destroying the billing manager.");
 
-        if (mBillingClient != null && mBillingClient.isReady())
+		if (mBillingClient != null && mBillingClient.isReady())
 		{
-            mBillingClient.endConnection();
-            mBillingClient = null;
-        }
-    }
+			mBillingClient.endConnection();
+			mBillingClient = null;
+		}
+	}
 
 	@Override
 	public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
