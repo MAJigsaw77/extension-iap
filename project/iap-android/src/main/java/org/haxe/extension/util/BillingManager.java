@@ -316,9 +316,9 @@ public class BillingManager implements PurchasesUpdatedListener
 		return supported;
 	}
 
-	public void queryPurchases()
+	public void queryPurchasesAsync()
 	{
-		Log.d(TAG, "queryPurchases() called");
+		Log.d(TAG, "queryPurchasesAsync() called");
 
 		executeServiceRequest(new Runnable()
 		{

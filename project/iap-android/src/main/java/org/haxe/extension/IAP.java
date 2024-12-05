@@ -62,10 +62,7 @@ public class IAP extends Extension
 						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				}
 				else if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
-				{
-					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
-						callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
-				}
+					callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				else
 					callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
 			}
@@ -99,22 +96,22 @@ public class IAP extends Extension
 		{
 			try
 			{
-			JSONArray purchasesArray = new JSONArray();
+				JSONArray purchasesArray = new JSONArray();
 
-			for (Purchase purchase : purchaseList)
-			{
-				if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+				for (Purchase purchase : purchaseList)
 				{
-					JSONObject purchaseJson = new JSONObject();
-					purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-					purchaseJson.put("signature", purchase.getSignature());
-					purchasesArray.put(purchaseJson);
+					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+					{
+						JSONObject purchaseJson = new JSONObject();
+						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+						purchaseJson.put("signature", purchase.getSignature());
+						purchasesArray.put(purchaseJson);
+					}
 				}
-			}
 
-			JSONObject jsonResp = new JSONObject();
-			jsonResp.put("purchases", purchasesArray);
-			callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
+				JSONObject jsonResp = new JSONObject();
+				jsonResp.put("purchases", purchasesArray);
+				callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
 			}
 			catch (Exception e)
 			{
@@ -149,59 +146,59 @@ public class IAP extends Extension
 
 			try
 			{
-			resultObject.put("productId", productDetails.getProductId());
-			resultObject.put("productType", productDetails.getProductType());
-			resultObject.put("title", productDetails.getTitle());
-			resultObject.put("name", productDetails.getName());
-			resultObject.put("description", productDetails.getDescription());
+				resultObject.put("productId", productDetails.getProductId());
+				resultObject.put("productType", productDetails.getProductType());
+				resultObject.put("title", productDetails.getTitle());
+				resultObject.put("name", productDetails.getName());
+				resultObject.put("description", productDetails.getDescription());
 
-			ProductDetails.OneTimePurchaseOfferDetails purchaseOfferDetails = productDetails.getOneTimePurchaseOfferDetails();
+				ProductDetails.OneTimePurchaseOfferDetails purchaseOfferDetails = productDetails.getOneTimePurchaseOfferDetails();
 
-			if (purchaseOfferDetails != null)
-			{
-				resultObject.put("formattedPrice", purchaseOfferDetails.getFormattedPrice());
-				resultObject.put("priceAmountMicros", purchaseOfferDetails.getPriceAmountMicros());
-				resultObject.put("priceCurrencyCode", purchaseOfferDetails.getPriceCurrencyCode());
-			}
-
-			List<ProductDetails.SubscriptionOfferDetails> subscriptionOfferDetailsList = productDetails.getSubscriptionOfferDetails();
-
-			if (subscriptionOfferDetailsList != null)
-			{
-				JSONArray offersArray = new JSONArray();
-
-				for (ProductDetails.SubscriptionOfferDetails offerDetails : subscriptionOfferDetailsList)
+				if (purchaseOfferDetails != null)
 				{
-					JSONObject offerJson = new JSONObject();
-
-					if (offerDetails.getOfferId() != null)
-						offerJson.put("offerId", offerDetails.getOfferId());
-
-					offerJson.put("basePlanId", offerDetails.getBasePlanId());
-					offerJson.put("offerTags", new JSONArray(offerDetails.getOfferTags()));
-					offerJson.put("offerToken", offerDetails.getOfferToken());
-
-					JSONArray pricingPhases = new JSONArray();
-
-					for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList())
-					{
-						JSONObject phaseJson = new JSONObject();
-						phaseJson.put("billingCycleCount", pricingPhase.getBillingCycleCount());
-						phaseJson.put("billingPeriod", pricingPhase.getBillingPeriod());
-						phaseJson.put("formattedPrice", pricingPhase.getFormattedPrice());
-						phaseJson.put("priceAmountMicros", pricingPhase.getPriceAmountMicros());
-						phaseJson.put("priceCurrencyCode", pricingPhase.getPriceCurrencyCode());
-						phaseJson.put("recurrenceMode", pricingPhase.getRecurrenceMode());
-						pricingPhases.put(phaseJson);
-					}
-
-					offerJson.put("pricingPhases", pricingPhases);
-
-					offersArray.put(offerJson);
+					resultObject.put("formattedPrice", purchaseOfferDetails.getFormattedPrice());
+					resultObject.put("priceAmountMicros", purchaseOfferDetails.getPriceAmountMicros());
+					resultObject.put("priceCurrencyCode", purchaseOfferDetails.getPriceCurrencyCode());
 				}
 
-				resultObject.put("subscriptionOffers", offersArray);
-			}
+				List<ProductDetails.SubscriptionOfferDetails> subscriptionOfferDetailsList = productDetails.getSubscriptionOfferDetails();
+
+				if (subscriptionOfferDetailsList != null)
+				{
+					JSONArray offersArray = new JSONArray();
+
+					for (ProductDetails.SubscriptionOfferDetails offerDetails : subscriptionOfferDetailsList)
+					{
+						JSONObject offerJson = new JSONObject();
+
+						if (offerDetails.getOfferId() != null)
+							offerJson.put("offerId", offerDetails.getOfferId());
+
+						offerJson.put("basePlanId", offerDetails.getBasePlanId());
+						offerJson.put("offerTags", new JSONArray(offerDetails.getOfferTags()));
+						offerJson.put("offerToken", offerDetails.getOfferToken());
+
+						JSONArray pricingPhases = new JSONArray();
+
+						for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList())
+						{
+							JSONObject phaseJson = new JSONObject();
+							phaseJson.put("billingCycleCount", pricingPhase.getBillingCycleCount());
+							phaseJson.put("billingPeriod", pricingPhase.getBillingPeriod());
+							phaseJson.put("formattedPrice", pricingPhase.getFormattedPrice());
+							phaseJson.put("priceAmountMicros", pricingPhase.getPriceAmountMicros());
+							phaseJson.put("priceCurrencyCode", pricingPhase.getPriceCurrencyCode());
+							phaseJson.put("recurrenceMode", pricingPhase.getRecurrenceMode());
+							pricingPhases.put(phaseJson);
+						}
+
+						offerJson.put("pricingPhases", pricingPhases);
+
+						offersArray.put(offerJson);
+					}
+
+					resultObject.put("subscriptionOffers", offersArray);
+				}
 			}
 			catch (Exception e)
 			{
@@ -259,7 +256,7 @@ public class IAP extends Extension
 		}
 	}
 
-	public static void acknowledgePurchase (final String purchaseJson, final String signature)
+	public static void acknowledgePurchase(final String purchaseJson, final String signature)
 	{
 		try
 		{
@@ -285,7 +282,7 @@ public class IAP extends Extension
 
 	public static void queryPurchases()
 	{
-		billingManager.queryPurchases();
+		billingManager.queryPurchasesAsync();
 	}
 
 	@Override

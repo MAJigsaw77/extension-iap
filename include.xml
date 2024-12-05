@@ -7,7 +7,7 @@
 	<section if="android">
 		<dependency name="iap" path="project/iap-android" />
 
-		<config:android extension="org.haxe.extension.InAppPurchase" />
+		<config:android extension="org.haxe.extension.IAP" />
 	</section>
 
 	<dependency name="StoreKit.framework" if="ios" />
