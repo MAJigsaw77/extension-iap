@@ -50,7 +50,7 @@ public class IAP extends Extension
 			acknowledgePurchaseInProgress.remove(token);
 
 			if (result.getResponseCode() == BillingResponseCode.OK)
-				callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson() });
+				callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
 			else
 				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
 		}
@@ -102,14 +102,10 @@ public class IAP extends Extension
 			{
 				if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
 				{
-					for (String key : purchase.getSkus())
-					{
-						JSONObject purchaseJson = new JSONObject();
-						purchaseJson.put("key", key);
-						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-						purchaseJson.put("signature", purchase.getSignature())
-						purchasesArray.put(purchaseJson);
-					}
+					JSONObject purchaseJson = new JSONObject();
+					purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+					purchaseJson.put("signature", purchase.getSignature())
+					purchasesArray.put(purchaseJson);
 				}
 			}
 
@@ -120,9 +116,13 @@ public class IAP extends Extension
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
 		{
+			JSONObject purchaseJson = new JSONObject();
+			purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+			purchaseJson.put("signature", purchase.getSignature())
+
 			JSONObject errorJson = new JSONObject();
 			errorJson.put("result", result.getResponseCode());
-			errorJson.put("product", new JSONObject(purchase.getOriginalJson()));
+			errorJson.put("purchase", purchaseJson);
 			return errorJson;
 		}
 
