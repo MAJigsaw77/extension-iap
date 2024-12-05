@@ -21,7 +21,6 @@ class Main extends lime.app.Application
 	public override function onWindowCreate():Void
 	{
 		iap.IAP.init(PUBLIC_KEY);
-		iap.IAP.queryPurchases();
 	}
 
 	public override function render(context:lime.graphics.RenderContext):Void
