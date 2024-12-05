@@ -20,7 +20,6 @@ import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.Purchase.PurchasesResult;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams;
