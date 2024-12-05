@@ -8,13 +8,17 @@ import lime.utils.Log;
 class IAPAndroid
 {
 	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
-	public static var onConsume(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onFailedConsume(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onAcknowledgePurchase(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onFailedAcknowledgePurchase(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onPurchase(default, null):Event<String->String-> Void> = new Event<String->String->Void>();
-	public static var onCanceledPurchase(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onFailedPurchase(default, null):Event<String->Void> = new Event<String->Void>();
+
+	public static var onConsume(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+	public static var onFailedConsume(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
+
+	public static var onAcknowledgePurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+	public static var onFailedAcknowledgePurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
+
+	public static var onPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+	public static var onCanceledPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+	public static var onFailedPurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
+
 	public static var onRequestProductDataComplete(default, null):Event<String->Void> = new Event<String->Void>();
 	public static var onQueryPurchasesFinished(default, null):Event<String->Void> = new Event<String->Void>();
 
@@ -86,40 +90,57 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		IAPAndroid.onStarted.dispatch(status);
 	}
 
-	@:keep @:runOnMainThread public function onConsume(purchase:String):Void
+
+
+	@:keep @:runOnMainThread public function onConsume(purchase:String, signature:String):Void
 	{
-		IAPAndroid.onConsume.dispatch(purchase);
+		IAPAndroid.onConsume.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
 	@:keep @:runOnMainThread public function onFailedConsume(error:String):Void
 	{
-		IAPAndroid.onFailedConsume.dispatch(error);
+		final error:Dynamic = haxe.Json.parse(error);
+
+		if (error != null)
+			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
 
-	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String):Void
+
+
+	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String, signature:String):Void
 	{
-		IAPAndroid.onAcknowledgePurchase.dispatch(new IAPPurchase('', '', haxe.Json.parse(purchase)));
+		IAPAndroid.onAcknowledgePurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
 	@:keep @:runOnMainThread public function onFailedAcknowledgePurchase(error:String):Void
 	{
-		IAPAndroid.onFailedAcknowledgePurchase.dispatch(error);
+		final error:Dynamic = haxe.Json.parse(error);
+
+		if (error != null)
+			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
+
+
 
 	@:keep @:runOnMainThread public function onPurchase(purchase:String, signature:String):Void
 	{
-		IAPAndroid.onPurchase.dispatch(new IAPPurchase('', signature, haxe.Json.parse(purchase)));
+		IAPAndroid.onPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
-	@:keep @:runOnMainThread public function onCanceledPurchase():Void
+	@:keep @:runOnMainThread public function onCanceledPurchase(purchase:String, signature:String):Void
 	{
-		IAPAndroid.onCanceledPurchase.dispatch();
+		IAPAndroid.onCanceledPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
 	@:keep @:runOnMainThread public function onFailedPurchase(error:String):Void
 	{
-		IAPAndroid.onFailedPurchase.dispatch(haxe.Json.parse(error).result);
+		final error:Dynamic = haxe.Json.parse(error);
+
+		if (error != null)
+			IAPAndroid.onFailedPurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
+
+
 
 	@:keep @:runOnMainThread public function onRequestProductDataComplete(result:String):Void
 	{
