@@ -7,6 +7,15 @@ class Main extends lime.app.Application
 	public function new():Void
 	{
 		super();
+
+		iap.IAP.onStarted.add(function(success:Bool):Void
+		{
+			#if android
+			android.widget.Toast.makeText(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!', android.widget.Toast.LENGTH_SHORT);
+			#else
+			lime.utils.Log.info(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!');
+			#end
+		});
 	}
 
 	public override function onWindowCreate():Void
