@@ -1,7 +1,7 @@
 package iap.android;
 
 #if android
-import admob.android.util.JNICache;
+import iap.android.util.JNICache;
 import lime.app.Event;
 import lime.utils.Log;
 
