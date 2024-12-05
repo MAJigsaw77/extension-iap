@@ -339,7 +339,6 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
-	@Override
 	private void onQueryPurchasesFinished(BillingResult result, List<Purchase> purchases)
 	{
 		Log.d(TAG, "onQueryPurchasesFinished() called with result: " + result.getResponseCode());
