@@ -37,7 +37,7 @@ public class IAP extends Extension
 			consumeInProgress.remove(token);
 
 			if (result.getResponseCode() == BillingResponseCode.OK)
-				callback.call("onConsume", new Object[] { purchase.getOriginalJson() });
+				callback.call("onConsume", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
 			else
 				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
 		}
