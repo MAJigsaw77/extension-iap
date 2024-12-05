@@ -5,28 +5,25 @@ import iap.IAPPricingPhase;
 @:nullSafety
 class IAPSubscriptionOffer
 {
-	public var offerId:Null<String> = null;
-	public var basePlanId:String = '';
-	public var offerTags:Array<String> = [];
-	public var offerToken:String = '';
-	public var pricingPhases:Array<IAPPricingPhase> = [];
+	public var offerId:Null<String>;
+	public var basePlanId:String;
+	public var offerTags:Array<String>;
+	public var offerToken:String;
+	public var pricingPhases:Array<IAPPricingPhase>;
 
-	public function new():Void {}
-
-	public static function fromJson(json:Dynamic):IAPSubscriptionOffer
+	public function new(json:Dynamic):Void
 	{
-		final offer:IAPSubscriptionOffer = new IAPSubscriptionOffer();
-		offer.offerId = json.offerId;
-		offer.basePlanId = json.basePlanId;
-		offer.offerTags = json.offerTags ?? [];
-		offer.offerToken = json.offerToken;
+		offerId = json.offerId;
+		basePlanId = json.basePlanId;
+		offerTags = json.offerTags ?? [];
+		offerToken = json.offerToken;
 
 		if (json.pricingPhases != null)
 		{
 			for (phaseJson in json.pricingPhases)
-				offer.pricingPhases.push(IAPPricingPhase.fromJson(phaseJson));
+				pricingPhases.push(new IAPPricingPhase(phaseJson));
 		}
-
-		return offer;
+		else
+			pricingPhases = [];
 	}
 }
