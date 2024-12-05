@@ -7,16 +7,16 @@ import lime.utils.Log;
 
 class IAPAndroid
 {
-	public static var onStarted:Event<Bool->Void> = new Event<Bool->Void>();
-	public static var onConsume:Event<String->Void> = new Event<String->Void>();
-	public static var onFailedConsume:Event<String->Void> = new Event<String->Void>();
-	public static var onAcknowledgePurchase:Event<String->Void> = new Event<String->Void>();
-	public static var onFailedAcknowledgePurchase:Event<String->Void> = new Event<String->Void>();
-	public static var onPurchase:Event<String->String-> Void> = new Event<String->String->Void>();
-	public static var onCanceledPurchase:Event<String->Void> = new Event<String->Void>();
-	public static var onFailedPurchase:Event<String->Void> = new Event<String->Void>();
-	public static var onRequestProductDataComplete:Event<String->Void> = new Event<String->Void>();
-	public static var onQueryPurchasesFinished:Event<String->Void> = new Event<String->Void>();
+	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
+	public static var onConsume(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onFailedConsume(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onAcknowledgePurchase(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onFailedAcknowledgePurchase(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onPurchase(default, null):Event<String->String-> Void> = new Event<String->String->Void>();
+	public static var onCanceledPurchase(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onFailedPurchase(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onRequestProductDataComplete(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onQueryPurchasesFinished(default, null):Event<String->Void> = new Event<String->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
@@ -98,7 +98,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String):Void
 	{
-		IAPAndroid.onAcknowledgePurchase.dispatch(purchase);
+		IAPAndroid.onAcknowledgePurchase.dispatch(new IAPPurchase('', '', haxe.Json.parse(purchase)));
 	}
 
 	@:keep @:runOnMainThread public function onFailedAcknowledgePurchase(error:String):Void
@@ -108,17 +108,17 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 	@:keep @:runOnMainThread public function onPurchase(purchase:String, signature:String):Void
 	{
-		IAPAndroid.onPurchase.dispatch(purchase, signature);
+		IAPAndroid.onPurchase.dispatch(new IAPPurchase('', signature, haxe.Json.parse(purchase)));
 	}
 
-	@:keep @:runOnMainThread public function onCanceledPurchase(reason:String):Void
+	@:keep @:runOnMainThread public function onCanceledPurchase():Void
 	{
-		IAPAndroid.onCanceledPurchase.dispatch(reason);
+		IAPAndroid.onCanceledPurchase.dispatch();
 	}
 
 	@:keep @:runOnMainThread public function onFailedPurchase(error:String):Void
 	{
-		IAPAndroid.onFailedPurchase.dispatch(error);
+		IAPAndroid.onFailedPurchase.dispatch(haxe.Json.parse(error).result);
 	}
 
 	@:keep @:runOnMainThread public function onRequestProductDataComplete(result:String):Void
