@@ -76,14 +76,14 @@ public class IAP extends Extension
 		}
 
 		@Override
-		public void onQueryProductDetailsFinished(List<ProductDetails> skuList, final BillingResult result)
+		public void onQueryProductDetailsFinished(List<ProductDetails> productList, final BillingResult result)
 		{
 			if (result.getResponseCode() == BillingResponseCode.OK)
 			{
 				JSONArray productsArray = new JSONArray();
 
-				for (ProductDetails sku : skuList)
-					productsArray.put(productDetailsToJson(sku));
+				for (ProductDetails product : productList)
+					productsArray.put(productDetailsToJson(product));
 
 				JSONObject jsonResp = new JSONObject();
 				jsonResp.put("products", productsArray);
@@ -253,9 +253,9 @@ public class IAP extends Extension
 		}
 	}
 
-	public static void querySkuDetails(String[] ids)
+	public static void queryProductDetails(String[] ids)
 	{
-		billingManager.querySkuDetailsAsync(ProductType.INAPP, Arrays.asList(ids));
+		billingManager.queryProductDetailsAsync(ProductType.INAPP, Arrays.asList(ids));
 	}
 
 	public static void queryInventory()

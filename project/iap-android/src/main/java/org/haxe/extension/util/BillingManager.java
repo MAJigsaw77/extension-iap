@@ -22,7 +22,7 @@ public class BillingManager implements PurchasesUpdatedListener
 	private Set<String> mTokensToBeConsumed;
 	private Set<String> mTokensToBeAcknowledged;
 	private int mBillingClientResponseCode = -1;
-	private Map<String, ProductDetails> mSkuDetailsMap = new HashMap<String, ProductDetails>();
+	private Map<String, ProductDetails> mProductDetailsMap = new HashMap<String, ProductDetails>();
 
 	public static String BASE_64_ENCODED_PUBLIC_KEY = "";
 
@@ -33,7 +33,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		void onConsumeFinished(String token, BillingResult result);
 		void onAcknowledgePurchaseFinished(String token, BillingResult result);
 		void onPurchasesUpdated(List<Purchase> purchases, BillingResult result);
-		void onQueryProductDetailsFinished(List<ProductDetails> skuDetailsList, BillingResult result);
+		void onQueryProductDetailsFinished(List<ProductDetails> productDetailsList, BillingResult result);
 	}
 
 	public BillingManager(Activity activity, final BillingUpdatesListener updatesListener)
@@ -65,17 +65,17 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
-	public void initiatePurchaseFlow(final String skuId)
+	public void initiatePurchaseFlow(final String productId)
 	{
-		Log.d(TAG, "Initiating purchase flow for SKU: " + skuId);
-		final ProductDetails skuDetail = mSkuDetailsMap.get(skuId);
+		Log.d(TAG, "Initiating purchase flow for SKU: " + productId);
+		final ProductDetails productDetail = mProductDetailsMap.get(productId);
 
-		if (skuDetail == null)
+		if (productDetail == null)
 		{
-			Log.d(TAG, "SKU not cached, querying details for: " + skuId);
+			Log.d(TAG, "SKU not cached, querying details for: " + productId);
 			ArrayList<String> ids = new ArrayList<String>();
-			ids.add(skuId);
-			querySkuDetailsAsync(ProductType.INAPP, ids);
+			ids.add(productId);
+			queryProductDetailsAsync(ProductType.INAPP, ids);
 		}
 		else
 		{
@@ -84,9 +84,9 @@ public class BillingManager implements PurchasesUpdatedListener
 				@Override
 				public void run()
 				{
-					Log.d(TAG, "Launching billing flow for: " + skuId);
+					Log.d(TAG, "Launching billing flow for: " + productId);
 					List<ProductDetailsParams> productDetailsParamsList = new ArrayList<ProductDetailsParams>();
-					productDetailsParamsList.add(ProductDetailsParams.newBuilder().setProductDetails(skuDetail).build());
+					productDetailsParamsList.add(ProductDetailsParams.newBuilder().setProductDetails(productDetail).build());
 					mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder().setProductDetailsParamsList(productDetailsParamsList).build());
 				}
 			}, new Runnable()
@@ -101,13 +101,13 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
-	public void querySkuDetailsAsync(final String itemType, final List<String> skuList)
+	public void queryProductDetailsAsync(final String itemType, final List<String> productList)
 	{
 		Log.d(TAG, "Querying SKU details for itemType: " + itemType);
 
 		final List<Product> productList = new ArrayList<Product>();
 
-		for (String productId : skuList)
+		for (String productId : productList)
 			productList.add(Product.newBuilder().setProductId(productId).setProductType(itemType).build());
 
 		executeServiceRequest(new Runnable()
@@ -119,17 +119,17 @@ public class BillingManager implements PurchasesUpdatedListener
 				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(productList).build(), new ProductDetailsResponseListener()
 				{
 					@Override
-					public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> skuDetailsList)
+					public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList)
 					{
 						Log.d(TAG, "Product details response received.");
-						mBillingUpdatesListener.onQueryProductDetailsFinished(skuDetailsList, billingResult);
+						mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
 
 						if (billingResult.getResponseCode() == BillingResponseCode.OK)
 						{
-							for (ProductDetails skuDetails : skuDetailsList)
+							for (ProductDetails productDetails : productDetailsList)
 							{
-								mSkuDetailsMap.put(skuDetails.getProductId(), skuDetails);
-								initiatePurchaseFlow(skuDetails.getProductId());
+								mProductDetailsMap.put(productDetails.getProductId(), productDetails);
+								initiatePurchaseFlow(productDetails.getProductId());
 								break;
 							}
 						}
@@ -295,7 +295,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			{
 				Log.d(TAG, "Querying in-app purchases");
 
-				PurchasesResult purchasesResult = mBillingClient.queryPurchases(SkuType.INAPP);
+				PurchasesResult purchasesResult = mBillingClient.queryPurchases(ProductType.INAPP);
 
 				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build(), new PurchasesResponseListener()
 				{
@@ -311,7 +311,7 @@ public class BillingManager implements PurchasesUpdatedListener
 				{
 					Log.d(TAG, "Querying subscription purchases");
 
-					PurchasesResult subscriptionResult = mBillingClient.queryPurchases(SkuType.SUBS);
+					PurchasesResult subscriptionResult = mBillingClient.queryPurchases(ProductType.SUBS);
 
 					if (subscriptionResult.getResponseCode() == BillingResponseCode.OK)
 					{

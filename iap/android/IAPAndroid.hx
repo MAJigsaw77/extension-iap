@@ -57,7 +57,7 @@ class IAPAndroid
 		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase, signature);
 	}
 
-	public static function querySkuDetails(ids:Array<String>):Void
+	public static function queryProductDetails(ids:Array<String>):Void
 	{
 		if (!initialized)
 		{
@@ -65,7 +65,7 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySkuDetails', '([Ljava/lang/String;)V')(ids);
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails', '([Ljava/lang/String;)V')(ids);
 	}
 
 	public static function queryInventory():Void
