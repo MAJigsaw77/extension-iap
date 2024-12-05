@@ -5,7 +5,7 @@ import iap.IAPSubscriptionOffer;
 @:nullSafety
 class IAPProductDetails
 {
-	public final productID:String;
+	public final productId:String;
 	public final productType:String;
 	public final title:String;
 	public final name:String;
@@ -18,7 +18,7 @@ class IAPProductDetails
 
 	public function new(json:Dynamic):Void
 	{
-		productID = json.productID;
+		productId = json.productId;
 		productType = json.productType;
 		title = json.title;
 		name = json.name;
