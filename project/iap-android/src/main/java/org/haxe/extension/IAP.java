@@ -73,23 +73,32 @@ public class IAP extends Extension
 
 		public void onQueryProductDetailsFinished(List<ProductDetails> productList, final BillingResult result)
 		{
-			if (result.getResponseCode() == BillingResponseCode.OK)
+			try
 			{
-				JSONArray productsArray = new JSONArray();
+				if (result.getResponseCode() == BillingResponseCode.OK)
+				{
+					JSONArray productsArray = new JSONArray();
 
-				for (ProductDetails product : productList)
-					productsArray.put(productDetailsToJson(product));
+					for (ProductDetails product : productList)
+						productsArray.put(productDetailsToJson(product));
 
-				JSONObject jsonResp = new JSONObject();
-				jsonResp.put("products", productsArray);
-				callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("products", productsArray);
+					callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
+				}
+				else
+					callback.call("onQueryProductDetailsFinished", new Object[] { "Failure" });
 			}
-			else
-				callback.call("onQueryProductDetailsFinished", new Object[] { "Failure" });
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		public void onQueryPurchasesFinished(List<Purchase> purchaseList)
 		{
+			try
+			{
 			JSONArray purchasesArray = new JSONArray();
 
 			for (Purchase purchase : purchaseList)
@@ -106,23 +115,40 @@ public class IAP extends Extension
 			JSONObject jsonResp = new JSONObject();
 			jsonResp.put("purchases", purchasesArray);
 			callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
 		{
-			JSONObject purchaseJson = new JSONObject();
-			purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-			purchaseJson.put("signature", purchase.getSignature());
-
 			JSONObject errorJson = new JSONObject();
-			errorJson.put("result", result.getResponseCode());
-			errorJson.put("purchase", purchaseJson);
+
+			try
+			{
+				errorJson.put("result", result.getResponseCode());
+
+				JSONObject purchaseJson = new JSONObject();
+				purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+				purchaseJson.put("signature", purchase.getSignature());
+				errorJson.put("purchase", purchaseJson);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
 			return errorJson;
 		}
 
 		public JSONObject productDetailsToJson(ProductDetails productDetails)
 		{
 			JSONObject resultObject = new JSONObject();
+
+			try
+			{
 			resultObject.put("productId", productDetails.getProductId());
 			resultObject.put("productType", productDetails.getProductType());
 			resultObject.put("title", productDetails.getTitle());
@@ -175,6 +201,11 @@ public class IAP extends Extension
 				}
 
 				resultObject.put("subscriptionOffers", offersArray);
+			}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 
 			return resultObject;
