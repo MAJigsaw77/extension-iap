@@ -5,11 +5,12 @@ import iap.IAPPricingPhase;
 @:nullSafety
 class IAPSubscriptionOffer
 {
-	public var offerId:Null<String>;
-	public var basePlanId:String;
-	public var offerTags:Array<String>;
-	public var offerToken:String;
-	public var pricingPhases:Array<IAPPricingPhase>;
+	public final offerId:Null<String>;
+	public final basePlanId:String;
+	public final offerTags:Array<String>;
+	public final offerToken:String;
+
+	public var pricingPhases(default, null):Array<IAPPricingPhase> = [];
 
 	public function new(json:Dynamic):Void
 	{
@@ -23,7 +24,5 @@ class IAPSubscriptionOffer
 			for (phaseJson in (json.pricingPhases : Array<Dynamic>))
 				pricingPhases.push(new IAPPricingPhase(phaseJson));
 		}
-		else
-			pricingPhases = [];
 	}
 }

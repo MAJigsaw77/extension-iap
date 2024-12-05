@@ -13,7 +13,8 @@ class IAPProductDetails
 	public final formattedPrice:String;
 	public final priceAmountMicros:Float;
 	public final priceCurrencyCode:String;
-	public final subscriptionOffers:Array<IAPSubscriptionOffer>;
+
+	public var subscriptionOffers(default, null):Array<IAPSubscriptionOffer> = [];
 
 	public function new(json:Dynamic):Void
 	{
@@ -31,7 +32,5 @@ class IAPProductDetails
 			for (offerJson in (json.subscriptionOffers : Array<Dynamic>))
 				subscriptionOffers.push(new IAPSubscriptionOffer(offerJson));
 		}
-		else
-			subscriptionOffers = [];
 	}
 }
