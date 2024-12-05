@@ -191,7 +191,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeConsumed == null)
 		{
 			Log.d(TAG, "mTokensToBeConsumed is null, initializing new HashSet");
-			mTokensToBeConsumed = new HashSetString>();
+			mTokensToBeConsumed = new HashSet<String>();
 		}
 		else if (mTokensToBeConsumed.contains(purchaseToken))
 		{
@@ -236,7 +236,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeAcknowledged == null)
 		{
 			Log.d(TAG, "mTokensToBeAcknowledged is null, initializing new HashSet");
-			mTokensToBeAcknowledged = new HashSetString>();
+			mTokensToBeAcknowledged = new HashSet<String>();
 		}
 		else if (mTokensToBeAcknowledged.contains(purchaseToken))
 		{
