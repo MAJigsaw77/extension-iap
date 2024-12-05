@@ -1,4 +1,4 @@
-package org.haxe.extension.iap.util;
+package org.haxe.extension.util;
 
 import android.app.Activity;
 import android.util.Log;
@@ -87,12 +87,12 @@ public class BillingManager implements PurchasesUpdatedListener
 
 	public void initiatePurchaseFlow(final String productId)
 	{
-		Log.d(TAG, "Initiating purchase flow for SKU: " + productId);
+		Log.d(TAG, "Initiating purchase flow for Product: " + productId);
 		final ProductDetails productDetail = mProductDetailsMap.get(productId);
 
 		if (productDetail == null)
 		{
-			Log.d(TAG, "SKU not cached, querying details for: " + productId);
+			Log.d(TAG, "Product not cached, querying details for: " + productId);
 			ArrayList<String> ids = new ArrayList<String>();
 			ids.add(productId);
 			queryProductDetailsAsync(ProductType.INAPP, ids);
@@ -123,12 +123,12 @@ public class BillingManager implements PurchasesUpdatedListener
 
 	public void queryProductDetailsAsync(final String itemType, final List<String> productList)
 	{
-		Log.d(TAG, "Querying SKU details for itemType: " + itemType);
+		Log.d(TAG, "Querying Product details for itemType: " + itemType);
 
-		final List<Product> productList = new ArrayList<Product>();
+		final List<Product> newProductList = new ArrayList<Product>();
 
 		for (String productId : productList)
-			productList.add(Product.newBuilder().setProductId(productId).setProductType(itemType).build());
+			newProductList.add(Product.newBuilder().setProductId(productId).setProductType(itemType).build());
 
 		executeServiceRequest(new Runnable()
 		{
@@ -136,7 +136,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			public void run()
 			{
 				Log.d(TAG, "Querying product details asynchronously.");
-				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(productList).build(), new ProductDetailsResponseListener()
+				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(newProductList).build(), new ProductDetailsResponseListener()
 				{
 					@Override
 					public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList)
@@ -155,7 +155,7 @@ public class BillingManager implements PurchasesUpdatedListener
 						}
 						else
 						{
-							Log.w(TAG, "Failed to retrieve SKU details: " + billingResult.getDebugMessage());
+							Log.w(TAG, "Failed to retrieve Product details: " + billingResult.getDebugMessage());
 						}
 					}
 				});
@@ -165,7 +165,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			@Override
 			public void run()
 			{
-				Log.e(TAG, "Failed to query SKU details.");
+				Log.e(TAG, "Failed to query Product details.");
 				mBillingUpdatesListener.onQueryProductDetailsFinished(null, errorResult);
 			}
 		});
@@ -178,7 +178,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeConsumed == null)
 		{
 			Log.d(TAG, "mTokensToBeConsumed is null, initializing new HashSet");
-			mTokensToBeConsumed = new HashSet<>();
+			mTokensToBeConsumed = new Set<String>();
 		}
 		else if (mTokensToBeConsumed.contains(purchaseToken))
 		{
@@ -223,7 +223,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		if (mTokensToBeAcknowledged == null)
 		{
 			Log.d(TAG, "mTokensToBeAcknowledged is null, initializing new HashSet");
-			mTokensToBeAcknowledged = new HashSet<>();
+			mTokensToBeAcknowledged = new Set<String>();
 		}
 		else if (mTokensToBeAcknowledged.contains(purchaseToken))
 		{

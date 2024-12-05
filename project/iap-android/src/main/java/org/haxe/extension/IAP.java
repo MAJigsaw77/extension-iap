@@ -23,13 +23,11 @@ public class IAP extends Extension
 {
 	private static class UpdateListener implements BillingUpdatesListener
 	{
-		@Override
 		public void onBillingClientSetupFinished(final Boolean success)
 		{
 			callback.call("onStarted", new Object[] { success });
 		}
 
-		@Override
 		public void onConsumeFinished(String token, final BillingResult result)
 		{
 			final Purchase purchase = consumeInProgress.get(token);
@@ -42,7 +40,6 @@ public class IAP extends Extension
 				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
 		}
 
-		@Override
 		public void onAcknowledgePurchaseFinished(String token, final BillingResult result)
 		{
 			final Purchase purchase = acknowledgePurchaseInProgress.get(token);
@@ -55,7 +52,6 @@ public class IAP extends Extension
 				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
 		}
 
-		@Override
 		public void onPurchasesUpdated(List<Purchase> purchaseList, final BillingResult result)
 		{
 			for (Purchase purchase : purchaseList) 
@@ -75,7 +71,6 @@ public class IAP extends Extension
 			}
 		}
 
-		@Override
 		public void onQueryProductDetailsFinished(List<ProductDetails> productList, final BillingResult result)
 		{
 			if (result.getResponseCode() == BillingResponseCode.OK)
@@ -93,7 +88,6 @@ public class IAP extends Extension
 				callback.call("onQueryProductDetailsFinished", new Object[] { "Failure" });
 		}
 
-		@Override
 		public void onQueryPurchasesFinished(List<Purchase> purchaseList)
 		{
 			JSONArray purchasesArray = new JSONArray();
