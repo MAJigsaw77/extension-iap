@@ -10,17 +10,13 @@ import lime.utils.Log;
 class IAPAndroid
 {
 	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
-
 	public static var onConsume(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 	public static var onFailedConsume(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
-
 	public static var onAcknowledgePurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 	public static var onFailedAcknowledgePurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
-
 	public static var onPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 	public static var onCanceledPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 	public static var onFailedPurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
-
 	public static var onQueryProductDetailsFinished(default, null):Event<String->Void> = new Event<String->Void>();
 	public static var onQueryPurchasesFinished(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
@@ -32,9 +28,14 @@ class IAPAndroid
 		if (initialized)
 			return;
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'init', '(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V')(publicKey, new CallBackHandler());
+		final initJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'init', '(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V');
 
-		initialized = true;
+		if (initJNI != null)
+		{
+			initJNI(publicKey, new CallBackHandler());
+
+			initialized = true;
+		}
 	}
 
 	public static function purchase(productDetails:IAPProductDetails):Void
@@ -45,7 +46,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;)V')(productDetails.productId);
+		final purchaseJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'purchase', '(Ljava/lang/String;)V');
+
+		if (purchaseJNI != null)
+			purchaseJNI(productDetails.productId);
 	}
 
 	public static function consume(purchase:IAPPurchase):Void
@@ -56,7 +60,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'consume', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase.stringifyedJson, purchase.signature);
+		final consumeJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'consume', '(Ljava/lang/String;Ljava/lang/String;)V');
+
+		if (consumeJNI != null)
+			consumeJNI(purchase.stringifyedJson, purchase.signature);
 	}
 
 	public static function acknowledgePurchase(purchase:IAPPurchase):Void
@@ -67,7 +74,11 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase', '(Ljava/lang/String;Ljava/lang/String;)V')(purchase.stringifyedJson, purchase.signature);
+		final acknowledgePurchaseJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'acknowledgePurchase',
+			'(Ljava/lang/String;Ljava/lang/String;)V');
+
+		if (acknowledgePurchaseJNI != null)
+			acknowledgePurchaseJNI(purchase.stringifyedJson, purchase.signature);
 	}
 
 	public static function queryProductDetails(ids:Array<String>):Void
@@ -78,7 +89,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails', '([Ljava/lang/String;)V')(ids);
+		final queryProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails', '([Ljava/lang/String;)V');
+
+		if (queryProductDetailsJNI != null)
+			queryProductDetailsJNI(ids);
 	}
 
 	public static function queryPurchases():Void
@@ -89,7 +103,10 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryPurchases', '()V')();
+		final queryPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryPurchases', '()V');
+
+		if (queryPurchasesJNI != null)
+			queryPurchasesJNI();
 	}
 }
 
@@ -197,7 +214,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		final purchases:Array<IAPPurchase> = [];
 
 		for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>))
-		     purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
+			purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
 
 		IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
 	}
