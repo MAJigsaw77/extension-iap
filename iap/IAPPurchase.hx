@@ -20,12 +20,12 @@ class IAPPurchase
 		this.key = key;
 		this.signature = signature;
 
-		orderId = json.originalJson.orderId;
-		packageName = json.originalJson.packageName;
-		developerPayload = json.originalJson.developerPayload;
-		productId = json.originalJson.productId;
-		purchaseTime = json.originalJson.purchaseTime;
-		token = json.originalJson.purchaseToken;
-		autoRenewing = json.originalJson.autoRenewing;
+		orderId = json.orderId;
+		packageName = json.packageName;
+		developerPayload = json.developerPayload;
+		productId = json.productId;
+		purchaseTime = json.purchaseTime;
+		token = json.purchaseToken;
+		autoRenewing = json.autoRenewing;
 	}
 }
