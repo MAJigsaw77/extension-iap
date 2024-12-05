@@ -139,6 +139,11 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 	@:keep @:runOnMainThread public function onQueryProductDetailsFinished(result:String):Void
 	{
+		final productsDetails:Array<IAPProductDetails> = [];
+
+		for (productDetails in (haxe.Json.parse(result).purchases : Array<Dynamic>))
+			productsDetails.push(new IAPProductDetails(productDetails));
+
 		IAPAndroid.onQueryProductDetailsFinished.dispatch(result);
 	}
 
@@ -146,7 +151,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	{
 		final purchases:Array<IAPPurchase> = [];
 
-		for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>)
+		for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>))
 		     purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
 
 		IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);

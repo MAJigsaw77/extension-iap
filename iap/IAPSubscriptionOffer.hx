@@ -15,12 +15,12 @@ class IAPSubscriptionOffer
 	{
 		offerId = json.offerId;
 		basePlanId = json.basePlanId;
-		offerTags = json.offerTags ?? [];
+		offerTags = (json.offerTags : Array<String>) ?? [];
 		offerToken = json.offerToken;
 
 		if (json.pricingPhases != null)
 		{
-			for (phaseJson in (json.pricingPhases : Array<Dynamic>)
+			for (phaseJson in (json.pricingPhases : Array<Dynamic>))
 				pricingPhases.push(new IAPPricingPhase(phaseJson));
 		}
 		else
