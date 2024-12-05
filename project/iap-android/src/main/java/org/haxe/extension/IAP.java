@@ -58,26 +58,20 @@ public class IAP extends Extension
 		@Override
 		public void onPurchasesUpdated(List<Purchase> purchaseList, final BillingResult result)
 		{
-			if (result.getResponseCode() == BillingResponseCode.OK)
+			for (Purchase purchase : purchaseList) 
 			{
-				for (Purchase purchase : purchaseList) 
+				if (result.getResponseCode() == BillingResponseCode.OK)
 				{
 					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
 						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				}
-			}
-			else
-			{
-				if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
+				else if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
 				{
-					for (Purchase purchase : purchaseList) 
-					{
-						if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
-							callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
-					}
+					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+						callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				}
 				else
-					callback.call("onFailedPurchase", new Object[] { createFailureJson(result) });
+					callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
 			}
 		}
 
@@ -130,13 +124,6 @@ public class IAP extends Extension
 			errorJson.put("result", result.getResponseCode());
 			errorJson.put("purchase", purchaseJson);
 			return errorJson;
-		}
-
-		private JSONObject createFailureJson(BillingResult result)
-		{
-			JSONObject failureJson = new JSONObject();
-			failureJson.put("result", new JSONObject().put("message", result.getResponseCode()));
-			return failureJson;
 		}
 
 		public JSONObject productDetailsToJson(ProductDetails productDetails)
