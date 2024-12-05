@@ -12,7 +12,9 @@ class IAPPurchase
 	public final purchaseTime:Int64;
 	public final token:String;
 	public final autoRenewing:Bool;
+
 	public final signature:String;
+	public final stringifyedJson:String;
 
 	public function new(json:Dynamic, signature:String):Void
 	{
@@ -25,5 +27,6 @@ class IAPPurchase
 		autoRenewing = json.autoRenewing;
 
 		this.signature = signature;
+		this.stringifyedJson = haxe.Json.stringify(json);
 	}
 }
