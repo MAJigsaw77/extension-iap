@@ -20,7 +20,7 @@ class IAPAndroid
 	public static var onFailedPurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
 
 	public static var onQueryProductDetailsFinished(default, null):Event<String->Void> = new Event<String->Void>();
-	public static var onQueryPurchasesFinished(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onQueryPurchasesFinished(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
@@ -144,7 +144,12 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 	@:keep @:runOnMainThread public function onQueryPurchasesFinished(result:String):Void
 	{
-		IAPAndroid.onQueryPurchasesFinished.dispatch(result);
+		final purchases:Array<IAPPurchase> = [];
+
+		for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>)
+		     purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
+
+		IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
 	}
 }
 #end
