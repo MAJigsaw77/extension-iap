@@ -76,7 +76,7 @@ public class IAP extends Extension
 		}
 
 		@Override
-		public void onQuerySkuDetailsFinished(List<ProductDetails> skuList, final BillingResult result)
+		public void onQueryProductDetailsFinished(List<ProductDetails> skuList, final BillingResult result)
 		{
 			if (result.getResponseCode() == BillingResponseCode.OK)
 			{
@@ -87,10 +87,10 @@ public class IAP extends Extension
 
 				JSONObject jsonResp = new JSONObject();
 				jsonResp.put("products", productsArray);
-				callback.call("onRequestProductDataComplete", new Object[] { jsonResp.toString() });
+				callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
 			}
 			else
-				callback.call("onRequestProductDataComplete", new Object[] { "Failure" });
+				callback.call("onQueryProductDetailsFinished", new Object[] { "Failure" });
 		}
 
 		@Override

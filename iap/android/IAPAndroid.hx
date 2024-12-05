@@ -19,7 +19,7 @@ class IAPAndroid
 	public static var onCanceledPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 	public static var onFailedPurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
 
-	public static var onRequestProductDataComplete(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onQueryProductDetailsFinished(default, null):Event<String->Void> = new Event<String->Void>();
 	public static var onQueryPurchasesFinished(default, null):Event<String->Void> = new Event<String->Void>();
 
 	@:noCompletion
@@ -142,9 +142,9 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 
 
-	@:keep @:runOnMainThread public function onRequestProductDataComplete(result:String):Void
+	@:keep @:runOnMainThread public function onQueryProductDetailsFinished(result:String):Void
 	{
-		IAPAndroid.onRequestProductDataComplete.dispatch(result);
+		IAPAndroid.onQueryProductDetailsFinished.dispatch(result);
 	}
 
 	@:keep @:runOnMainThread public function onQueryPurchasesFinished(result:String):Void

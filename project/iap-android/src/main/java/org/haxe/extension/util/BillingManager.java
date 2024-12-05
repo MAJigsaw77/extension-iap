@@ -33,7 +33,7 @@ public class BillingManager implements PurchasesUpdatedListener
 		void onConsumeFinished(String token, BillingResult result);
 		void onAcknowledgePurchaseFinished(String token, BillingResult result);
 		void onPurchasesUpdated(List<Purchase> purchases, BillingResult result);
-		void onQuerySkuDetailsFinished(List<ProductDetails> skuDetailsList, BillingResult result);
+		void onQueryProductDetailsFinished(List<ProductDetails> skuDetailsList, BillingResult result);
 	}
 
 	public BillingManager(Activity activity, final BillingUpdatesListener updatesListener)
@@ -122,7 +122,7 @@ public class BillingManager implements PurchasesUpdatedListener
 					public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> skuDetailsList)
 					{
 						Log.d(TAG, "Product details response received.");
-						mBillingUpdatesListener.onQuerySkuDetailsFinished(skuDetailsList, billingResult);
+						mBillingUpdatesListener.onQueryProductDetailsFinished(skuDetailsList, billingResult);
 
 						if (billingResult.getResponseCode() == BillingResponseCode.OK)
 						{
@@ -146,7 +146,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			public void run()
 			{
 				Log.e(TAG, "Failed to query SKU details.");
-				mBillingUpdatesListener.onQuerySkuDetailsFinished(null, errorResult);
+				mBillingUpdatesListener.onQueryProductDetailsFinished(null, errorResult);
 			}
 		});
 	}
