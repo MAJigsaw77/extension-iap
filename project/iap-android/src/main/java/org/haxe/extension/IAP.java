@@ -69,7 +69,13 @@ public class IAP extends Extension
 			else
 			{
 				if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
-					callback.call("onCanceledPurchase", new Object[] { "Canceled" });
+				{
+					for (Purchase purchase : purchaseList) 
+					{
+						if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+							callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
+					}
+				}
 				else
 					callback.call("onFailedPurchase", new Object[] { createFailureJson(result) });
 			}
