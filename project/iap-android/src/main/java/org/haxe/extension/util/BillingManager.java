@@ -6,13 +6,7 @@ import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.FeatureType;
-import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.QueryProductDetailsParams;
-import com.android.billingclient.api.QueryProductDetailsParams.Product;
-import com.android.billingclient.api.QueryPurchaseHistoryParams;
-import com.android.billingclient.api.QueryPurchasesParams;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ProductDetails;
@@ -42,7 +36,6 @@ public class BillingManager implements PurchasesUpdatedListener
 	private boolean mIsServiceConnected;
 	private Set<String> mTokensToBeConsumed;
 	private Set<String> mTokensToBeAcknowledged;
-	private int mBillingClientResponseCode = -1;
 	private Map<String, ProductDetails> mProductDetailsMap = new HashMap<String, ProductDetails>();
 
 	public static String BASE_64_ENCODED_PUBLIC_KEY = "";
@@ -69,8 +62,6 @@ public class BillingManager implements PurchasesUpdatedListener
 			@Override
 			public void onBillingSetupFinished(BillingResult billingResponse)
 			{
-				mBillingClientResponseCode = billingResponse.getResponseCode();
-
 				Log.d(TAG, "onBillingSetupFinished() responseCode: " + billingResponse.getResponseCode());
 
 				if (billingResponse.getResponseCode() == BillingResponseCode.OK)
@@ -114,31 +105,10 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
-	@Override
-	public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
-	{
-		Log.d(TAG, "onPurchasesUpdated: ResponseCode=" + result.getResponseCode());
-
-		if (result.getResponseCode() == BillingResponseCode.OK)
-		{
-			mPurchases.clear();
-			for (Purchase purchase : purchases)
-			{
-				Log.d(TAG, "Processing purchase: " + purchase.getOrderId());
-				handlePurchase(purchase);
-			}
-			mBillingUpdatesListener.onPurchasesUpdated(mPurchases, result);
-		}
-		else
-		{
-			Log.w(TAG, "Purchases update failed: " + result.getDebugMessage());
-			mBillingUpdatesListener.onPurchasesUpdated(purchases, result);
-		}
-	}
-
 	public void initiatePurchaseFlow(final String productId)
 	{
 		Log.d(TAG, "Initiating purchase flow for Product: " + productId);
+
 		final ProductDetails productDetail = mProductDetailsMap.get(productId);
 
 		if (productDetail == null)
@@ -176,6 +146,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList)
 			{
 				Log.d(TAG, "Product details response received.");
+
 				mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
 
 				if (billingResult.getResponseCode() == BillingResponseCode.OK)
@@ -183,7 +154,9 @@ public class BillingManager implements PurchasesUpdatedListener
 					for (ProductDetails productDetails : productDetailsList)
 					{
 						mProductDetailsMap.put(productDetails.getProductId(), productDetails);
+
 						initiatePurchaseFlow(productDetails.getProductId());
+
 						break;
 					}
 				}
@@ -220,7 +193,9 @@ public class BillingManager implements PurchasesUpdatedListener
 			public void onConsumeResponse(BillingResult billingResult, String purchaseToken)
 			{
 				mTokensToBeConsumed.remove(purchaseToken);
+
 				Log.d(TAG, "Consume response received for token: " + purchaseToken + " with result: " + billingResult.getResponseCode());
+
 				mBillingUpdatesListener.onConsumeFinished(purchaseToken, billingResult);
 			}
 		});
@@ -251,7 +226,9 @@ public class BillingManager implements PurchasesUpdatedListener
 			public void onAcknowledgePurchaseResponse(BillingResult billingResult)
 			{
 				mTokensToBeAcknowledged.remove(purchaseToken);
+
 				Log.d(TAG, "Acknowledge purchase response received for token: " + purchaseToken + " with result: " + billingResult.getResponseCode());
+
 				mBillingUpdatesListener.onAcknowledgePurchaseFinished(purchaseToken, billingResult);
 			}
 		});
@@ -271,26 +248,6 @@ public class BillingManager implements PurchasesUpdatedListener
 
 		Log.d(TAG, "Purchase added: " + purchase.getOriginalJson());
 	}
-	
-	private void onQueryPurchasesFinished(BillingResult result, List<Purchase> purchases )
-	{
-		Log.d(TAG, "onQueryPurchasesFinished() called with result: " + result.getResponseCode());
-
-		if (mBillingClient == null || result.getResponseCode() != BillingResponseCode.OK)
-		{
-			Log.e(TAG, "Billing client setup failed or response code is not OK");
-			return;
-		}
-
-		mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
-	}
-
-	public boolean areSubscriptionsSupported()
-	{
-		boolean supported = mBillingClient.isFeatureSupported(FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingResponseCode.OK;
-		Log.d(TAG, "areSubscriptionsSupported() called, result: " + supported);
-		return supported;
-	}
 
 	public void queryPurchasesAsync()
 	{
@@ -309,7 +266,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			}
 		});
 
-		if (areSubscriptionsSupported())
+		if (mBillingClient.isFeatureSupported(FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingResponseCode.OK)
 		{
 			Log.d(TAG, "Querying subscription purchases");
 
@@ -345,5 +302,43 @@ public class BillingManager implements PurchasesUpdatedListener
 
 			return false;
 		}
+	}
+
+	@Override
+	public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
+	{
+		Log.d(TAG, "onPurchasesUpdated: ResponseCode=" + result.getResponseCode());
+
+		if (result.getResponseCode() == BillingResponseCode.OK)
+		{
+			mPurchases.clear();
+
+			for (Purchase purchase : purchases)
+			{
+				Log.d(TAG, "Processing purchase: " + purchase.getOrderId());
+				handlePurchase(purchase);
+			}
+
+			mBillingUpdatesListener.onPurchasesUpdated(mPurchases, result);
+		}
+		else
+		{
+			Log.w(TAG, "Purchases update failed: " + result.getDebugMessage());
+			mBillingUpdatesListener.onPurchasesUpdated(purchases, result);
+		}
+	}
+
+	@Override
+	private void onQueryPurchasesFinished(BillingResult result, List<Purchase> purchases)
+	{
+		Log.d(TAG, "onQueryPurchasesFinished() called with result: " + result.getResponseCode());
+
+		if (mBillingClient == null || result.getResponseCode() != BillingResponseCode.OK)
+		{
+			Log.e(TAG, "Billing client setup failed or response code is not OK");
+			return;
+		}
+
+		mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
 	}
 }
