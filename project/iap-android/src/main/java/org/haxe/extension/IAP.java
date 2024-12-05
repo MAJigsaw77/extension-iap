@@ -225,7 +225,9 @@ public class IAP extends Extension
 		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
 
 		updateListener = new UpdateListener();
+
 		billingManager = new BillingManager(Extension.mainActivity, updateListener);
+		billingManager.startServiceConnection(null, null);
 	}
 
 	public static void purchase(final String productID, final String devPayload)
