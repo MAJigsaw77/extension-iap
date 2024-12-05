@@ -328,13 +328,12 @@ public class BillingManager implements PurchasesUpdatedListener
 			{
 				Log.d(TAG, "Querying in-app purchases");
 
-				PurchasesResult purchasesResult = mBillingClient.queryPurchases(ProductType.INAPP);
-
 				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build(), new PurchasesResponseListener()
 				{
+					@Override
 					public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
 					{
-						Log.d(TAG, "Query purchases response received with result: " + billingResult.getResponseCode());
+						Log.d(TAG, "In-app purchases query response received with result: " + billingResult.getResponseCode());
 
 						onQueryPurchasesFinished(billingResult, purchases);
 					}
@@ -344,13 +343,21 @@ public class BillingManager implements PurchasesUpdatedListener
 				{
 					Log.d(TAG, "Querying subscription purchases");
 
-					PurchasesResult subscriptionResult = mBillingClient.queryPurchases(ProductType.SUBS);
-
-					if (subscriptionResult.getResponseCode() == BillingResponseCode.OK)
+					mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build(), new PurchasesResponseListener()
 					{
-						purchasesResult.getPurchasesList().addAll(subscriptionResult.getPurchasesList());
-						Log.d(TAG, "Subscription purchases added");
-					}
+						@Override
+						public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
+						{
+							if (billingResult.getResponseCode() == BillingResponseCode.OK)
+							{
+								Log.d(TAG, "Subscription purchases query response received with result: " + billingResult.getResponseCode());
+
+								onQueryPurchasesFinished(billingResult, purchases);
+							}
+							else
+								Log.e(TAG, "Failed to query subscription purchases: " + billingResult.getDebugMessage());
+						}
+					});
 				}
 			}
 		}, new Runnable()
