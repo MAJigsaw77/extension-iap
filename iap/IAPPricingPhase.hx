@@ -1,6 +1,5 @@
 package iap;
 
-@:nullSafety
 class IAPPricingPhase
 {
 	public final billingCycleCount:Int;

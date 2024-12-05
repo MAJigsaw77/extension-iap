@@ -2,7 +2,6 @@ package iap;
 
 import iap.IAPPricingPhase;
 
-@:nullSafety
 class IAPSubscriptionOffer
 {
 	public final offerId:Null<String>;

@@ -2,7 +2,6 @@ package iap;
 
 import haxe.Int64;
 
-@:nullSafety
 class IAPPurchase
 {
 	public final orderId:String;

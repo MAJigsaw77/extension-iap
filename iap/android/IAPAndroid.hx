@@ -7,7 +7,6 @@ import iap.IAPPurchase;
 import lime.app.Event;
 import lime.utils.Log;
 
-@:nullSafety
 class IAPAndroid
 {
 	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();

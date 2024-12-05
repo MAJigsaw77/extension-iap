@@ -2,7 +2,6 @@ package iap;
 
 import iap.IAPSubscriptionOffer;
 
-@:nullSafety
 class IAPProductDetails
 {
 	public final productId:String;
