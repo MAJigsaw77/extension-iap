@@ -112,7 +112,11 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		IAPAndroid.onConsume.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
-	@:keep @:runOnMainThread public function onFailedConsume(error:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onFailedConsume(error:String):Void
 	{
 		final error:Dynamic = haxe.Json.parse(error);
 
@@ -120,12 +124,20 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
 
-	@:keep @:runOnMainThread public function onAcknowledgePurchase(purchase:String, signature:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onAcknowledgePurchase(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onAcknowledgePurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
-	@:keep @:runOnMainThread public function onFailedAcknowledgePurchase(error:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onFailedAcknowledgePurchase(error:String):Void
 	{
 		final error:Dynamic = haxe.Json.parse(error);
 
@@ -133,17 +145,29 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
 
-	@:keep @:runOnMainThread public function onPurchase(purchase:String, signature:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onPurchase(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
-	@:keep @:runOnMainThread public function onCanceledPurchase(purchase:String, signature:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onCanceledPurchase(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onCanceledPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
 	}
 
-	@:keep @:runOnMainThread public function onFailedPurchase(error:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onFailedPurchase(error:String):Void
 	{
 		final error:Dynamic = haxe.Json.parse(error);
 
@@ -151,7 +175,11 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onFailedPurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
 	}
 
-	@:keep @:runOnMainThread public function onQueryProductDetailsFinished(result:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQueryProductDetailsFinished(result:String):Void
 	{
 		final productsDetails:Array<IAPProductDetails> = [];
 
@@ -161,7 +189,11 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 		IAPAndroid.onQueryProductDetailsFinished.dispatch(result);
 	}
 
-	@:keep @:runOnMainThread public function onQueryPurchasesFinished(result:String):Void
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQueryPurchasesFinished(result:String):Void
 	{
 		final purchases:Array<IAPPurchase> = [];
 
