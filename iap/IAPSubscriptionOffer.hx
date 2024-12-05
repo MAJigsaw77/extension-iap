@@ -20,7 +20,7 @@ class IAPSubscriptionOffer
 
 		if (json.pricingPhases != null)
 		{
-			for (phaseJson in json.pricingPhases)
+			for (phaseJson in (json.pricingPhases : Array<Dynamic>)
 				pricingPhases.push(new IAPPricingPhase(phaseJson));
 		}
 		else
