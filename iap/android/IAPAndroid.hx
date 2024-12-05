@@ -68,7 +68,7 @@ class IAPAndroid
 		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails', '([Ljava/lang/String;)V')(ids);
 	}
 
-	public static function queryInventory():Void
+	public static function queryPurchases():Void
 	{
 		if (!initialized)
 		{
@@ -76,7 +76,7 @@ class IAPAndroid
 			return;
 		}
 
-		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInventory', '()V')();
+		JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryPurchases', '()V')();
 	}
 }
 
