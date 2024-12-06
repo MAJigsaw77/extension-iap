@@ -56,7 +56,7 @@ class Main extends lime.app.Application
 				for (product in products)
 				{
 					#if android
-					android.widget.Toast.makeText('Product Details found: ${product.title}', android.widget.Toast.LENGTH_SHORT).show();
+					android.widget.Toast.makeText('Product Details found: ${product.title}', android.widget.Toast.LENGTH_SHORT);
 					#else
 					lime.utils.Log.info("Product Details found: " + product.title);
 					#end
@@ -65,7 +65,7 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No products found.", android.widget.Toast.LENGTH_SHORT).show();
+				android.widget.Toast.makeText("No products found.", android.widget.Toast.LENGTH_SHORT);
 				#else
 				lime.utils.Log.info("No products found.");
 				#end
