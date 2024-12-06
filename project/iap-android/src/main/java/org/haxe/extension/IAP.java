@@ -276,14 +276,24 @@ public class IAP extends Extension
 		}
 	}
 
-	public static void queryProductDetails(String[] ids)
+	public static void queryInAppProductDetailsAsync(String[] ids)
 	{
-		billingManager.queryProductDetailsAsync(Arrays.asList(ids));
+		billingManager.queryInAppProductDetailsAsync(Arrays.asList(ids));
 	}
 
-	public static void queryPurchases()
+	public static void querySubsProductDetailsAsync(String[] ids)
 	{
-		billingManager.queryPurchasesAsync();
+		billingManager.querySubsProductDetailsAsync(Arrays.asList(ids));
+	}
+
+	public static void queryInAppPurchasesAsync()
+	{
+		billingManager.queryInAppPurchasesAsync();
+	}
+
+	public static void querySubsPurchasesAsync()
+	{
+		billingManager.querySubsPurchasesAsync();
 	}
 
 	@Override
