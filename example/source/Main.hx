@@ -11,7 +11,7 @@ class Main extends lime.app.Application
 		iap.IAP.onStarted.add(function(success:Bool):Void
 		{
 			#if android
-			android.widget.Toast.makeText(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!', android.widget.Toast.LENGTH_SHORT).show();
+			android.widget.Toast.makeText(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!', android.widget.Toast.LENGTH_SHORT);
 			#else
 			lime.utils.Log.info(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!');
 			#end
@@ -20,7 +20,7 @@ class Main extends lime.app.Application
 		iap.IAP.onError.add(function(errorMessage:String):Void
 		{
 			#if android
-			android.widget.Toast.makeText(errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+			android.widget.Toast.makeText(errorMessage, android.widget.Toast.LENGTH_SHORT);
 			#else
 			lime.utils.Log.info(errorMessage);
 			#end
@@ -33,7 +33,7 @@ class Main extends lime.app.Application
 				for (purchase in purchases)
 				{
 					#if android
-					android.widget.Toast.makeText('Purchase found: ${purchase.productId}', android.widget.Toast.LENGTH_SHORT).show();
+					android.widget.Toast.makeText('Purchase found: ${purchase.productId}', android.widget.Toast.LENGTH_SHORT);
 					#else
 					lime.utils.Log.info("Purchase found: " + purchase.productId);
 					#end
@@ -42,7 +42,7 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No purchases found.", android.widget.Toast.LENGTH_SHORT).show();
+				android.widget.Toast.makeText("No purchases found.", android.widget.Toast.LENGTH_SHORT);
 				#else
 				lime.utils.Log.info("No purchases found.");
 				#end
