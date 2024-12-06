@@ -110,8 +110,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			for (String productId : productList)
 				newProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(itemType).build());
 
-			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(newProductList).build(), (billingResult, productDetailsList) ->
-			{
+			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(newProductList).build(), (billingResult, productDetailsList) -> {
 				mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
 
 				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
@@ -141,10 +140,11 @@ public class BillingManager implements PurchasesUpdatedListener
 
 		try
 		{
-			mBillingClient.consumeAsync(ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build(), (billingResult, token) ->
-			{
+			mBillingClient.consumeAsync(ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build(), (billingResult, token) -> {
 				synchronized (mTokensToBeConsumed)
+				{
 					mTokensToBeConsumed.remove(token);
+				}
 
 				mBillingUpdatesListener.onConsumeFinished(token, billingResult);
 			});
@@ -167,10 +167,11 @@ public class BillingManager implements PurchasesUpdatedListener
 
 		try
 		{
-			mBillingClient.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchaseToken).build(), (billingResult) ->
-			{
+			mBillingClient.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchaseToken).build(), (billingResult) -> {
 				synchronized (mTokensToBeAcknowledged)
+				{
 					mTokensToBeAcknowledged.remove(purchaseToken);
+				}
 
 				mBillingUpdatesListener.onAcknowledgePurchaseFinished(purchaseToken, billingResult);
 			});
