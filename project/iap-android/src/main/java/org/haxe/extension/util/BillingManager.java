@@ -87,7 +87,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			final ProductDetails productDetail = mProductDetailsMap.get(productId);
 
 			if (productDetail == null)
-				queryProductDetailsAsync(BillingClient.ProductType.INAPP, Collections.singletonList(productId));
+				queryInAppProductDetailsAsync(Collections.singletonList(productId));
 			else
 			{
 				List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
