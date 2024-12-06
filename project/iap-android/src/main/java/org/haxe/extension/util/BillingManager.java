@@ -128,6 +128,21 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
+	public void queryPurchasesAsync()
+	{
+		try
+		{
+			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+
+			if (mBillingClient.isFeatureSupported(FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingResponseCode.OK)
+				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+		}
+		catch (Exception e)
+		{
+			mBillingUpdatesListener.onError("Failed to query purchases: " + e.getMessage());
+		}
+	}
+
 	public void consumeAsync(final String purchaseToken)
 	{
 		synchronized (mTokensToBeConsumed)
