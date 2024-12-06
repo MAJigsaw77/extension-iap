@@ -16,6 +16,15 @@ class Main extends lime.app.Application
 			lime.utils.Log.info(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!');
 			#end
 		});
+
+		iap.IAP.onError.add(function(errorMessage:String):Void
+		{
+			#if android
+			android.widget.Toast.makeText(errorMessage, android.widget.Toast.LENGTH_SHORT);
+			#else
+			lime.utils.Log.info(errorMessage);
+			#end
+		});
 	}
 
 	public override function onWindowCreate():Void
