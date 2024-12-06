@@ -330,7 +330,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
 		}
 		catch (e:haxe.Exception)
-			IAPAndroid.onError.dispatch(e.getMessage());
+			IAPAndroid.onError.dispatch(e.message);
 	}
 
 	@:keep
@@ -349,7 +349,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
 		}
 		catch (e:haxe.Exception)
-			IAPAndroid.onError.dispatch(e.getMessage());
+			IAPAndroid.onError.dispatch(e.message);
 	}
 
 	@:keep
