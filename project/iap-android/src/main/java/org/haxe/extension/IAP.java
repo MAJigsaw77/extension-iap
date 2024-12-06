@@ -23,12 +23,12 @@ public class IAP extends Extension
 {
 	private static class UpdateListener implements BillingUpdatesListener
 	{
-		public void onBillingClientSetupFinished(final Boolean success)
+		public void onBillingClientSetupFinished(Boolean success)
 		{
 			callback.call("onStarted", new Object[] { success });
 		}
 
-		public void onConsumeFinished(String token, final BillingResult result)
+		public void onConsumeFinished(String token, BillingResult result)
 		{
 			final Purchase purchase = consumeInProgress.get(token);
 
@@ -40,7 +40,7 @@ public class IAP extends Extension
 				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
 		}
 
-		public void onAcknowledgePurchaseFinished(String token, final BillingResult result)
+		public void onAcknowledgePurchaseFinished(String token, BillingResult result)
 		{
 			final Purchase purchase = acknowledgePurchaseInProgress.get(token);
 
@@ -52,7 +52,7 @@ public class IAP extends Extension
 				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
 		}
 
-		public void onPurchasesUpdated(List<Purchase> purchaseList, final BillingResult result)
+		public void onPurchasesUpdated(List<Purchase> purchaseList, BillingResult result)
 		{
 			for (Purchase purchase : purchaseList) 
 			{
@@ -68,7 +68,7 @@ public class IAP extends Extension
 			}
 		}
 
-		public void onQueryProductDetailsFinished(List<ProductDetails> productList, final BillingResult result)
+		public void onQueryProductDetailsFinished(List<ProductDetails> productList, BillingResult result)
 		{
 			try
 			{
@@ -117,6 +117,11 @@ public class IAP extends Extension
 			{
 				e.printStackTrace();
 			}
+		}
+
+		public void onError(String errorMessage)
+		{
+			callback.call("onError", new Object[] { errorMessage });
 		}
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
