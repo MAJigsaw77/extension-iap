@@ -50,7 +50,8 @@ public class IAP extends Extension
 
 		public void onPurchasesUpdated(List<Purchase> purchaseList, BillingResult result)
 		{
-			if (purchaseList != null) {
+			if (purchaseList != null)
+			{
 				for (Purchase purchase : purchaseList)
 				{
 					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
@@ -70,22 +71,20 @@ public class IAP extends Extension
 		{
 			try
 			{
+				JSONArray productsArray = new JSONArray();
+
 				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
-					JSONArray productsArray = new JSONArray();
-
 					if (productList != null)
 					{
 						for (ProductDetails product : productList)
 							productsArray.put(productDetailsToJson(product));
 					}
-
-					JSONObject jsonResp = new JSONObject();
-					jsonResp.put("products", productsArray);
-					callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
 				}
-				else
-					callback.call("onQueryProductDetailsFinished", new Object[] { "Failure" });
+
+				JSONObject jsonResp = new JSONObject();
+				jsonResp.put("products", productsArray);
+				callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
 			}
 			catch (Exception e)
 			{
