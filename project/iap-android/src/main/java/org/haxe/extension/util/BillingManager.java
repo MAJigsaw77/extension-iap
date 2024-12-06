@@ -191,7 +191,9 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 
 		synchronized (mPurchases)
+		{
 			mPurchases.add(purchase);
+		}
 	}
 
 	private boolean verifyValidSignature(String signedData, String signature)
