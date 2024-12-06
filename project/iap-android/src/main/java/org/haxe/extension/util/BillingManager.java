@@ -101,16 +101,16 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
-	public void queryProductDetailsAsync(final String itemType, final List<String> productList)
+	public void queryInAppProductDetailsAsync(final List<String> productList)
 	{
 		try
 		{
-			List<QueryProductDetailsParams.Product> newProductList = new ArrayList<>();
+			List<QueryProductDetailsParams.Product> inAppProductList = new ArrayList<>();
 
 			for (String productId : productList)
-				newProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(itemType).build());
+				inAppProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.INAPP).build());
 
-			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(newProductList).build(), (billingResult, productDetailsList) -> {
+			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(inAppProductList).build(), (billingResult, productDetailsList) -> {
 				mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
 
 				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
@@ -119,27 +119,80 @@ public class BillingManager implements PurchasesUpdatedListener
 						mProductDetailsMap.put(productDetails.getProductId(), productDetails);
 				}
 				else
+				{
 					mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+				}
 			});
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query product details: " + e.getMessage());
+			mBillingUpdatesListener.onError("Failed to query INAPP product details: " + e.getMessage());
 		}
 	}
 
-	public void queryPurchasesAsync()
+	public void querySubsProductDetailsAsync(final List<String> productList)
+	{
+		try
+		{
+			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
+			{
+				List<QueryProductDetailsParams.Product> subsProductList = new ArrayList<>();
+
+				for (String productId : productList)
+				{
+					subsProductList.add(QueryProductDetailsParams.Product.newBuilder()
+						.setProductId(productId)
+						.setProductType(BillingClient.ProductType.SUBS)
+						.build());
+				}
+
+				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build(), (billingResult, productDetailsList) -> {
+					mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
+
+					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						for (ProductDetails productDetails : productDetailsList)
+							mProductDetailsMap.put(productDetails.getProductId(), productDetails);
+					}
+					else
+					{
+						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+					}
+				});
+			}
+			else
+			{
+				mBillingUpdatesListener.onError("Subscriptions feature is not supported.");
+			}
+		}
+		catch (Exception e)
+		{
+			mBillingUpdatesListener.onError("Failed to query SUBS product details: " + e.getMessage());
+		}
+	}
+
+	public void queryInAppPurchasesAsync()
 	{
 		try
 		{
 			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+		}
+		catch (Exception e)
+		{
+			mBillingUpdatesListener.onError("Failed to query INAPP purchases: " + e.getMessage());
+		}
+	}
 
+	public void querySubsPurchasesAsync()
+	{
+		try
+		{
 			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
 				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query purchases: " + e.getMessage());
+			mBillingUpdatesListener.onError("Failed to query SUBS purchases: " + e.getMessage());
 		}
 	}
 
