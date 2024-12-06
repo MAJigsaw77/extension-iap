@@ -26,7 +26,7 @@ class Main extends lime.app.Application
 			#end
 		});
 
-		iap.IAP.onQueryPurchasesFinished.add(function(purchases:Array<IAPPurchase>):Void
+		iap.IAP.onQueryPurchasesFinished.add(function(purchases:Array<iap.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
 			{
@@ -53,8 +53,12 @@ class Main extends lime.app.Application
 	public override function onWindowCreate():Void
 	{
 		iap.IAP.init(PUBLIC_KEY);
-		iap.IAP.queryInAppPurchasesAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
-		iap.IAP.querySubsPurchasesAsync(['testsubs']);
+
+		iap.IAP.queryInAppPurchasesAsync();
+		iap.IAP.querySubsPurchasesAsync();
+
+		// iap.IAP.queryInAppPurchasesAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
+		// iap.IAP.querySubsPurchasesAsync(['testsubs']);
 	}
 
 	public override function render(context:lime.graphics.RenderContext):Void
