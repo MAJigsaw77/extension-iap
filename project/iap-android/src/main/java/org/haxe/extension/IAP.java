@@ -278,7 +278,7 @@ public class IAP extends Extension
 
 	public static void queryProductDetails(String[] ids)
 	{
-		billingManager.queryProductDetailsAsync(BillingClient.ProductType.INAPP, Arrays.asList(ids));
+		billingManager.queryProductDetailsAsync(Arrays.asList(ids));
 	}
 
 	public static void queryPurchases()
