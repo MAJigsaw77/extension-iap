@@ -50,17 +50,19 @@ public class IAP extends Extension
 
 		public void onPurchasesUpdated(List<Purchase> purchaseList, BillingResult result)
 		{
-			for (Purchase purchase : purchaseList) 
-			{
-				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+			if (purchaseList != null) {
+				for (Purchase purchase : purchaseList)
 				{
-					if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
+					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+							callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
+					}
+					else if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED)
+						callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
+					else
+						callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
 				}
-				else if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED)
-					callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
-				else
-					callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
 			}
 		}
 
@@ -72,8 +74,11 @@ public class IAP extends Extension
 				{
 					JSONArray productsArray = new JSONArray();
 
-					for (ProductDetails product : productList)
-						productsArray.put(productDetailsToJson(product));
+					if (productList != null)
+					{
+						for (ProductDetails product : productList)
+							productsArray.put(productDetailsToJson(product));
+					}
 
 					JSONObject jsonResp = new JSONObject();
 					jsonResp.put("products", productsArray);
@@ -94,14 +99,17 @@ public class IAP extends Extension
 			{
 				JSONArray purchasesArray = new JSONArray();
 
-				for (Purchase purchase : purchaseList)
+				if (purchaseList != null)
 				{
-					if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+					for (Purchase purchase : purchaseList)
 					{
-						JSONObject purchaseJson = new JSONObject();
-						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-						purchaseJson.put("signature", purchase.getSignature());
-						purchasesArray.put(purchaseJson);
+						if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+						{
+							JSONObject purchaseJson = new JSONObject();
+							purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+							purchaseJson.put("signature", purchase.getSignature());
+							purchasesArray.put(purchaseJson);
+						}
 					}
 				}
 
@@ -241,7 +249,7 @@ public class IAP extends Extension
 		});
 	}
 
-	public static void consume(final String purchaseJson, final String signature) 
+	public static void consume(final String purchaseJson, final String signature)
 	{
 		try
 		{
