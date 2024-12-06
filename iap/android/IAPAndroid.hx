@@ -320,25 +320,20 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#end
 	public function onQueryProductDetailsFinished(result:String):Void
 	{
-		try
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
 		{
-			final parsedResult:Dynamic = haxe.Json.parse(result);
+			final productsDetails:Array<IAPProductDetails> = [];
 
-			if (parsedResult != null)
+			if (parsedResult.purchases != null)
 			{
-				final productsDetails:Array<IAPProductDetails> = [];
-
-				if (parsedResult.purchases != null)
-				{
-					for (productDetails in (parsedResult.purchases : Array<Dynamic>))
-						productsDetails.push(new IAPProductDetails(productDetails));
-				}
-
-				IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
+				for (productDetails in (parsedResult.purchases : Array<Dynamic>))
+					productsDetails.push(new IAPProductDetails(productDetails));
 			}
+
+			IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
 		}
-		catch (e:haxe.Exception)
-			IAPAndroid.onError.dispatch(e.message);
 	}
 
 	@:keep
@@ -347,25 +342,20 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#end
 	public function onQueryPurchasesFinished(result:String):Void
 	{
-		try
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
 		{
-			final parsedResult:Dynamic = haxe.Json.parse(result);
+			final purchases:Array<IAPPurchase> = [];
 
-			if (parsedResult != null)
+			if (parsedResult.purchases != null)
 			{
-				final purchases:Array<IAPPurchase> = [];
-
-				if (parsedResult.purchases != null)
-				{
-					for (purchase in (parsedResult.purchases : Array<Dynamic>))
-						purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
-				}
-
-				IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
+				for (purchase in (parsedResult.purchases : Array<Dynamic>))
+					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
 			}
+
+			IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
 		}
-		catch (e:haxe.Exception)
-			IAPAndroid.onError.dispatch(e.message);
 	}
 
 	@:keep
