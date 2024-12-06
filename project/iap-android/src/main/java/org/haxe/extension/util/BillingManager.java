@@ -132,10 +132,10 @@ public class BillingManager implements PurchasesUpdatedListener
 	{
 		try
 		{
-			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
 
-			if (mBillingClient.isFeatureSupported(FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingResponseCode.OK)
-				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
+				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
 		}
 		catch (Exception e)
 		{
