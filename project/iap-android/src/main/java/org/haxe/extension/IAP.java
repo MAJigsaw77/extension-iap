@@ -1,14 +1,10 @@
 package org.haxe.extension;
 
 import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClient.ProductType;
-import com.android.billingclient.api.BillingClient.BillingResponseCode;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.Purchase.PurchaseState;
 import com.android.billingclient.api.ProductDetails;
 import org.haxe.extension.util.BillingManager;
-import org.haxe.extension.util.BillingManager.BillingUpdatesListener;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import org.json.JSONArray;
@@ -21,7 +17,7 @@ import java.util.Map;
 
 public class IAP extends Extension
 {
-	private static class UpdateListener implements BillingUpdatesListener
+	private static class UpdateListener implements BillingManager.BillingUpdatesListener
 	{
 		public void onBillingClientSetupFinished(Boolean success)
 		{
@@ -34,7 +30,7 @@ public class IAP extends Extension
 
 			consumeInProgress.remove(token);
 
-			if (result.getResponseCode() == BillingResponseCode.OK)
+			if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				callback.call("onConsume", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
 			else
 				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
@@ -46,7 +42,7 @@ public class IAP extends Extension
 
 			acknowledgePurchaseInProgress.remove(token);
 
-			if (result.getResponseCode() == BillingResponseCode.OK)
+			if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
 			else
 				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
@@ -56,12 +52,12 @@ public class IAP extends Extension
 		{
 			for (Purchase purchase : purchaseList) 
 			{
-				if (result.getResponseCode() == BillingResponseCode.OK)
+				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
-					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+					if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
 						callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				}
-				else if (result.getResponseCode() ==  BillingResponseCode.USER_CANCELED)
+				else if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED)
 					callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
 				else
 					callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
@@ -72,7 +68,7 @@ public class IAP extends Extension
 		{
 			try
 			{
-				if (result.getResponseCode() == BillingResponseCode.OK)
+				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
 					JSONArray productsArray = new JSONArray();
 
@@ -100,7 +96,7 @@ public class IAP extends Extension
 
 				for (Purchase purchase : purchaseList)
 				{
-					if (purchase.getPurchaseState() == PurchaseState.PURCHASED)
+					if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
 					{
 						JSONObject purchaseJson = new JSONObject();
 						purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
@@ -282,7 +278,7 @@ public class IAP extends Extension
 
 	public static void queryProductDetails(String[] ids)
 	{
-		billingManager.queryProductDetailsAsync(ProductType.INAPP, Arrays.asList(ids));
+		billingManager.queryProductDetailsAsync(BillingClient.ProductType.INAPP, Arrays.asList(ids));
 	}
 
 	public static void queryPurchases()
