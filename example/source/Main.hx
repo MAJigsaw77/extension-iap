@@ -48,6 +48,29 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
+
+		iap.IAP.onQueryProductDetailsFinished.add(function(products:Array<iap.IAPProductDetails>):Void
+		{
+			if (products != null && products.length > 0)
+			{
+				for (product in products)
+				{
+					#if android
+					android.Tools.showAlertDialog('Product Details found: ${product.title}', product.description, {name: 'Ok', func: null});
+					#else
+					lime.utils.Log.info("Product Details found: " + product.title);
+					#end
+				}
+			}
+			else
+			{
+				#if android
+				android.widget.Toast.makeText("No products found.", android.widget.Toast.LENGTH_SHORT);
+				#else
+				lime.utils.Log.info("No products found.");
+				#end
+			}
+		});
 	}
 
 	public override function onWindowCreate():Void
@@ -57,8 +80,8 @@ class Main extends lime.app.Application
 		iap.IAP.queryInAppPurchasesAsync();
 		iap.IAP.querySubsPurchasesAsync();
 
-		// iap.IAP.queryInAppPurchasesAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
-		// iap.IAP.querySubsPurchasesAsync(['testsubs']);
+		iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
+		iap.IAP.querySubsProductDetailsAsync(['testsubs']);
 	}
 
 	public override function render(context:lime.graphics.RenderContext):Void
