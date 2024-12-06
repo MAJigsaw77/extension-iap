@@ -261,7 +261,7 @@ public class IAP extends Extension
 		}
 		catch (Exception e)
 		{
-			callback.call("onFailedConsume", new Object[] {});
+			callback.call("onError", new Object[] { e.getMessage() });
 		}
 	}
 
@@ -280,7 +280,7 @@ public class IAP extends Extension
 		}
 		catch (Exception e)
 		{
-			callback.call("onFailedAcknowledgePurchase", new Object[] {});
+			callback.call("onError", new Object[] { e.getMessage() });
 		}
 	}
 
