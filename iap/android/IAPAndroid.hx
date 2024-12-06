@@ -82,7 +82,7 @@ class IAPAndroid
 			acknowledgePurchaseJNI(purchase.stringifyedJson, purchase.signature);
 	}
 
-	public static function queryProductDetails(ids:Array<String>):Void
+	public static function queryInAppProductDetailsAsync(ids:Array<String>):Void
 	{
 		if (!initialized)
 		{
@@ -90,13 +90,14 @@ class IAPAndroid
 			return;
 		}
 
-		final queryProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails', '([Ljava/lang/String;)V');
+		final queryInAppProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInAppProductDetailsAsync',
+			'([Ljava/lang/String;)V');
 
-		if (queryProductDetailsJNI != null)
-			queryProductDetailsJNI(ids);
+		if (queryInAppProductDetailsJNI != null)
+			queryInAppProductDetailsJNI(ids);
 	}
 
-	public static function queryPurchases():Void
+	public static function querySubsProductDetailsAsync(ids:Array<String>):Void
 	{
 		if (!initialized)
 		{
@@ -104,10 +105,39 @@ class IAPAndroid
 			return;
 		}
 
-		final queryPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryPurchases', '()V');
+		final querySubsProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySubsProductDetailsAsync',
+			'([Ljava/lang/String;)V');
 
-		if (queryPurchasesJNI != null)
-			queryPurchasesJNI();
+		if (querySubsProductDetailsJNI != null)
+			querySubsProductDetailsJNI(ids);
+	}
+
+	public static function queryInAppPurchasesAsync():Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		final queryInAppPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInAppPurchasesAsync', '()V');
+
+		if (queryInAppPurchasesJNI != null)
+			queryInAppPurchasesJNI();
+	}
+
+	public static function querySubsPurchasesAsync():Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		final querySubsPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySubsPurchasesAsync', '()V');
+
+		if (querySubsPurchasesJNI != null)
+			querySubsPurchasesJNI();
 	}
 }
 
