@@ -322,14 +322,14 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	{
 		try
 		{
-		final productsDetails:Array<IAPProductDetails> = [];
+			final productsDetails:Array<IAPProductDetails> = [];
 
-		for (productDetails in (haxe.Json.parse(result).purchases : Array<Dynamic>))
-			productsDetails.push(new IAPProductDetails(productDetails));
+			for (productDetails in (haxe.Json.parse(result).purchases : Array<Dynamic>))
+				productsDetails.push(new IAPProductDetails(productDetails));
 
-		IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
+			IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
 		}
-		catch (e:Exception)
+		catch (e:haxe.Exception)
 			IAPAndroid.onError.dispatch(e.getMessage());
 	}
 
@@ -340,15 +340,15 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	public function onQueryPurchasesFinished(result:String):Void
 	{
 		try
-		
-		final purchases:Array<IAPPurchase> = [];
+		{
+			final purchases:Array<IAPPurchase> = [];
 
-		for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>))
-			purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
+			for (purchase in (haxe.Json.parse(result).purchases : Array<Dynamic>))
+				purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
 
-		IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
+			IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
 		}
-		catch (e:Exception)
+		catch (e:haxe.Exception)
 			IAPAndroid.onError.dispatch(e.getMessage());
 	}
 
