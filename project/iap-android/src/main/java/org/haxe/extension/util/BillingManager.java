@@ -101,6 +101,29 @@ public class BillingManager implements PurchasesUpdatedListener
 		}
 	}
 
+	public void initiateSubscriptionFlow(final String productId)
+	{
+		try
+		{
+			final ProductDetails productDetail = mProductDetailsMap.get(productId);
+
+			if (productDetail == null)
+				querySubsProductDetailsAsync(Collections.singletonList(productId));
+			else
+			{
+				List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
+				productDetailsParamsList.add(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(productDetail).build());
+				mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder()
+					.setProductDetailsParamsList(productDetailsParamsList)
+					.build());
+			}
+		}
+		catch (Exception e)
+		{
+			mBillingUpdatesListener.onError("Failed to initiate subscription flow: " + e.getMessage());
+		}
+	}
+
 	public void queryInAppProductDetailsAsync(final List<String> productList)
 	{
 		try
