@@ -248,6 +248,18 @@ public class IAP extends Extension
 		});
 	}
 
+	public static void subscribe(final String productID)
+	{
+		Extension.mainActivity.runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				billingManager.initiateSubscriptionFlow(productID);
+			}
+		});
+	}
+
 	public static void consume(final String purchaseJson, final String signature)
 	{
 		try
