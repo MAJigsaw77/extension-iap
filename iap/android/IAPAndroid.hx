@@ -124,6 +124,24 @@ class IAPAndroid
 	}
 
 	/**
+	 * Initiates a subscription for a product.
+	 * @param productDetails The IAPProductDetails object representing the product to be subscribed to.
+	 */
+	public static function subscribe(productDetails:IAPProductDetails):Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP is not initialized. Subscription cannot proceed.');
+			return;
+		}
+
+		final subscribeJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'subscribe', '(Ljava/lang/String;)V');
+
+		if (subscribeJNI != null)
+			subscribeJNI(productDetails.productId);
+	}
+
+	/**
 	 * Consumes a purchased product.
 	 * @param purchase The IAPPurchase object representing the purchase to be consumed.
 	 */
