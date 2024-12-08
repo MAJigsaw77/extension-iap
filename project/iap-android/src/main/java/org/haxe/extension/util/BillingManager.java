@@ -48,7 +48,9 @@ public class BillingManager
 				public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
 				{
 					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-						categorizePurchases();
+						categorizePurchases(purchases);
+					else
+						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
 				}
 			}).build();
 
