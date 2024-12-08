@@ -9,10 +9,8 @@ public class BillingManager
 	private final Activity mActivity;
 	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final String mBase64EncodedPublicKey;
-
 	private final List<Purchase> mInAppPurchases = Collections.synchronizedList(new ArrayList<>());
 	private final List<Purchase> mSubscriptionPurchases = Collections.synchronizedList(new ArrayList<>());
-
 	private final Map<String, ProductDetails> mInAppProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 	private final Map<String, ProductDetails> mSubscriptionProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 
