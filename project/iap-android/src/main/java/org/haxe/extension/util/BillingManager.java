@@ -36,7 +36,27 @@ public class BillingManager implements PurchasesUpdatedListener
 
 		try
 		{
-			mBillingClient = BillingClient.newBuilder(mActivity).enablePendingPurchases().setListener(this).build();
+			mBillingClient = BillingClient.newBuilder(mActivity).enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().enablePrepaidPlans().build()).setListener(new PurchasesUpdatedListener()
+			{
+				@Override
+				public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
+				{
+					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						synchronized (mPurchases)
+						{
+							mPurchases.clear();
+							mPurchases.addAll(purchases);
+						}
+
+						for (Purchase purchase : purchases)
+							handlePurchase(purchase);
+					}
+					
+					mBillingUpdatesListener.onPurchasesUpdated(purchases, result);
+				}
+			}).build();
+
 			mBillingClient.startConnection(new BillingClientStateListener()
 			{
 				@Override
@@ -113,9 +133,7 @@ public class BillingManager implements PurchasesUpdatedListener
 			{
 				List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
 				productDetailsParamsList.add(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(productDetail).build());
-				mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder()
-					.setProductDetailsParamsList(productDetailsParamsList)
-					.build());
+				mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder().setProductDetailsParamsList(productDetailsParamsList).build());
 			}
 		}
 		catch (Exception e)
@@ -198,7 +216,25 @@ public class BillingManager implements PurchasesUpdatedListener
 	{
 		try
 		{
-			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), new PurchasesResponseListener()
+			{
+				@Override
+				public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
+				{
+					if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
+						return;
+
+					synchronized (mPurchases)
+					{
+						mPurchases.clear();
+
+						if (purchases != null)
+							mPurchases.addAll(purchases);
+					}
+
+					mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
+				}
+			});
 		}
 		catch (Exception e)
 		{
@@ -211,7 +247,27 @@ public class BillingManager implements PurchasesUpdatedListener
 		try
 		{
 			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
-				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), (billingResult, purchases) -> onQueryPurchasesFinished(billingResult, purchases));
+			{
+				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), new PurchasesResponseListener()
+				{
+					@Override
+					public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
+					{
+						if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
+							return;
+
+						synchronized (mPurchases)
+						{
+							mPurchases.clear();
+
+							if (purchases != null)
+								mPurchases.addAll(purchases);
+						}
+
+						mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
+					}
+				});
+			}
 		}
 		catch (Exception e)
 		{
@@ -298,39 +354,5 @@ public class BillingManager implements PurchasesUpdatedListener
 			mBillingUpdatesListener.onError("Failed to verify purchase signature: " + e.getMessage());
 			return false;
 		}
-	}
-
-	private void onQueryPurchasesFinished(BillingResult result, List<Purchase> purchases)
-	{
-		if (mBillingClient == null || result.getResponseCode() != BillingClient.BillingResponseCode.OK)
-			return;
-
-		synchronized (mPurchases)
-		{
-			mPurchases.clear();
-
-			if (purchases != null)
-				mPurchases.addAll(purchases);
-		}
-
-		mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
-	}
-
-	@Override
-	public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
-	{
-		if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-		{
-			synchronized (mPurchases)
-			{
-				mPurchases.clear();
-				mPurchases.addAll(purchases);
-			}
-
-			for (Purchase purchase : purchases)
-				handlePurchase(purchase);
-		}
-
-		mBillingUpdatesListener.onPurchasesUpdated(purchases, result);
 	}
 }
