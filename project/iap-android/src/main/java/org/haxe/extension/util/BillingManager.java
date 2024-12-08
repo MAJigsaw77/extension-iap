@@ -22,13 +22,16 @@ public class BillingManager
 	public interface BillingUpdatesListener
 	{
 		void onBillingClientSetup(Boolean success);
-		void onBillingClientError(String errorMessage);
+		void onBillingClientDebugLog(String errorMessage);
+
+		void onInAppPurchasesUpdated(List<Purchase> inAppPurchases);
+		void onSubsPurchasesUpdated(List<Purchase> subscriptionPurchases);
 
 		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
 		void onQuerySubsPurchases(List<Purchase> subscriptionPurchases);
 
 		void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
-		void onQuerySubsDetails(List<ProductDetails> productDetailsList, BillingResult result);
+		void onQuerySubsProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
 
 		void onConsume(String token, BillingResult result);
 		void onAcknowledgePurchase(String token, BillingResult result);
@@ -48,9 +51,50 @@ public class BillingManager
 				public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
 				{
 					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-						categorizePurchases(purchases);
+					{
+						synchronized (mInAppPurchases)
+						{
+							mInAppPurchases.clear();
+						}
+
+						synchronized (mSubscriptionPurchases)
+						{
+							mSubscriptionPurchases.clear();
+						}
+
+						for (Purchase purchase : purchases)
+						{
+							if (verifyPurchase(purchase))
+							{
+								if (purchase.getProducts().contains(BillingClient.ProductType.INAPP))
+								{
+									synchronized (mInAppPurchases)
+									{
+										mInAppPurchases.add(purchase);
+									}
+								}
+								else if (purchase.getProducts().contains(BillingClient.ProductType.SUBS))
+								{
+									synchronized (mSubscriptionPurchases)
+									{
+										mSubscriptionPurchases.add(purchase);
+									}
+								}
+							}
+						}
+
+						synchronized (mInAppPurchases)
+						{
+							mBillingUpdatesListener.onInAppPurchasesUpdated(new ArrayList<>(mInAppPurchases));
+						}
+
+						synchronized (mSubscriptionPurchases)
+						{
+							mBillingUpdatesListener.onSubsPurchasesUpdated(new ArrayList<>(mSubscriptionPurchases));
+						}
+					}
 					else
-						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 				}
 			}).build();
 
@@ -64,7 +108,7 @@ public class BillingManager
 					mBillingUpdatesListener.onBillingClientSetup(mIsServiceConnected);
 
 					if (!mIsServiceConnected)
-						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 				}
 
 				@Override
@@ -78,7 +122,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to start billing connection: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to start billing connection: " + e.getMessage());
 		}
 	}
 
@@ -94,7 +138,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to destroy billing client: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to destroy billing client: " + e.getMessage());
 		}
 	}
 
@@ -115,7 +159,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to initiate purchase flow: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to initiate purchase flow: " + e.getMessage());
 		}
 	}
 
@@ -136,7 +180,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to initiate subscription flow: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to initiate subscription flow: " + e.getMessage());
 		}
 	}
 
@@ -158,12 +202,12 @@ public class BillingManager
 						mInAppProductDetailsMap.put(productDetails.getProductId(), productDetails);
 				}
 				else
-					mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+					mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 			});
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query INAPP product details: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query INAPP product details: " + e.getMessage());
 		}
 	}
 
@@ -187,15 +231,15 @@ public class BillingManager
 							mSubscriptionProductDetailsMap.put(productDetails.getProductId(), productDetails);
 					}
 					else
-						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 				});
 			}
 			else
-				mBillingUpdatesListener.onError("Subscriptions feature is not supported.");
+				mBillingUpdatesListener.onBillingClientDebugLog("Subscriptions feature is not supported.");
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query SUBS product details: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query SUBS product details: " + e.getMessage());
 		}
 	}
 
@@ -220,13 +264,13 @@ public class BillingManager
 						}
 					}
 					else
-						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 				}
 			});
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query INAPP purchases: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query INAPP purchases: " + e.getMessage());
 		}
 	}
 
@@ -253,14 +297,14 @@ public class BillingManager
 							}
 						}
 						else
-							mBillingUpdatesListener.onError(billingResult.getDebugMessage());
+							mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
 					}
 				});
 			}
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to query SUBS purchases: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query SUBS purchases: " + e.getMessage());
 		}
 	}
 
@@ -287,7 +331,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to consume purchase: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to consume purchase: " + e.getMessage());
 		}
 	}
 
@@ -314,54 +358,7 @@ public class BillingManager
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to acknowledge purchase: " + e.getMessage());
-		}
-	}
-
-	private void categorizePurchases(List<Purchase> purchases)
-	{
-		if (purchases == null)
-			return;
-
-		synchronized (mInAppPurchases)
-		{
-			mInAppPurchases.clear();
-		}
-
-		synchronized (mSubscriptionPurchases)
-		{
-			mSubscriptionPurchases.clear();
-		}
-
-		for (Purchase purchase : purchases)
-		{
-			if (verifyPurchase(purchase))
-			{
-				if (purchase.getProducts().contains(BillingClient.ProductType.INAPP))
-				{
-					synchronized (mInAppPurchases)
-					{
-						mInAppPurchases.add(purchase);
-					}
-				}
-				else if (purchase.getProducts().contains(BillingClient.ProductType.SUBS))
-				{
-					synchronized (mSubscriptionPurchases)
-					{
-						mSubscriptionPurchases.add(purchase);
-					}
-				}
-			}
-		}
-
-		synchronized (mInAppPurchases)
-		{
-			mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
-		}
-
-		synchronized (mSubscriptionPurchases)
-		{
-			mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to acknowledge purchase: " + e.getMessage());
 		}
 	}
 
@@ -371,13 +368,13 @@ public class BillingManager
 		{
 			if (!Security.verifyPurchase(mBase64EncodedPublicKey, purchase.getOriginalJson(), purchase.getSignature()))
 			{
-				mBillingUpdatesListener.onError("Invalid purchase signature.");
+				mBillingUpdatesListener.onBillingClientDebugLog("Invalid purchase signature.");
 				return false;
 			}
 		}
 		catch (Exception e)
 		{
-			mBillingUpdatesListener.onError("Failed to verify purchase signature: " + e.getMessage());
+			mBillingUpdatesListener.onBillingClientDebugLog("Failed to verify purchase signature: " + e.getMessage());
 			return false;
 		}
 
