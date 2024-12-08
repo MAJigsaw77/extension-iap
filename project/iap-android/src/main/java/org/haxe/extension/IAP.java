@@ -108,13 +108,141 @@ public class IAP extends Extension
 
 	private static class IAPUpdateListener implements BillingManager.BillingUpdatesListener
 	{
-		public void onBillingClientSetupFinished(Boolean success)
+		public void onBillingClientSetup(Boolean success)
 		{
 			if (callback != null)
 				callback.call("onStarted", new Object[] { success });
 		}
 
-		public void onConsumeFinished(String token, BillingResult result)
+		public void onBillingClientDebugLog(String message)
+		{
+			if (callback != null)
+				callback.call("onDebugLog", new Object[] { message });
+		}
+
+		public void onQueryInAppPurchases(List<Purchase> inAppPurchases)
+		{
+			if (callback != null)
+			{
+				try
+				{
+					JSONArray purchasesArray = new JSONArray();
+
+					if (inAppPurchases != null)
+					{
+						for (Purchase purchase : inAppPurchases)
+						{
+							if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+							{
+								JSONObject purchaseJson = new JSONObject();
+								purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+								purchaseJson.put("signature", purchase.getSignature());
+								purchasesArray.put(purchaseJson);
+							}
+						}
+					}
+
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("purchases", purchasesArray);
+					callback.call("onQueryInAppPurchases", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void onQuerySubsPurchases(List<Purchase> subscriptionPurchases)
+		{
+			if (callback != null)
+			{
+				try
+				{
+					JSONArray purchasesArray = new JSONArray();
+
+					if (subscriptionPurchases != null)
+					{
+						for (Purchase purchase : subscriptionPurchases)
+						{
+							if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+							{
+								JSONObject purchaseJson = new JSONObject();
+								purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+								purchaseJson.put("signature", purchase.getSignature());
+								purchasesArray.put(purchaseJson);
+							}
+						}
+					}
+
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("purchases", purchasesArray);
+					callback.call("onQuerySubsPurchases", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
+		{
+			if (callback != null)
+			{
+				try
+				{
+					JSONArray productsArray = new JSONArray();
+
+					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						if (productDetailsList != null)
+						{
+							for (ProductDetails product : productDetailsList)
+								productsArray.put(productDetailsToJson(product));
+						}
+					}
+
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("products", productsArray);
+					callback.call("onQueryInAppProductDetails", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void onQuerySubsProductDetails(List<ProductDetails> productList, BillingResult result)
+		{
+			if (callback != null)
+			{
+				try
+				{
+					JSONArray productsArray = new JSONArray();
+
+					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						if (productDetailsList != null)
+						{
+							for (ProductDetails product : productDetailsList)
+								productsArray.put(productDetailsToJson(product));
+						}
+					}
+
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("products", productsArray);
+					callback.call("onQuerySubsProductDetails", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void onConsume(String token, BillingResult result)
 		{
 			final Purchase purchase = consumeInProgress.get(token);
 
@@ -129,7 +257,7 @@ public class IAP extends Extension
 			}
 		}
 
-		public void onAcknowledgePurchaseFinished(String token, BillingResult result)
+		public void onAcknowledgePurchase(String token, BillingResult result)
 		{
 			final Purchase purchase = acknowledgePurchaseInProgress.get(token);
 
@@ -142,92 +270,6 @@ public class IAP extends Extension
 				else
 					callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
 			}
-		}
-
-		public void onPurchasesUpdated(List<Purchase> purchaseList, BillingResult result)
-		{
-			if (callback != null && purchaseList != null)
-			{
-				for (Purchase purchase : purchaseList)
-				{
-					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-					{
-						if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-							callback.call("onPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
-					}
-					else if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED)
-						callback.call("onCanceledPurchase", new Object[]{ purchase.getOriginalJson(), purchase.getSignature() });
-					else
-						callback.call("onFailedPurchase", new Object[] { createErrorJson(result, purchase) });
-				}
-			}
-		}
-
-		public void onQueryProductDetailsFinished(List<ProductDetails> productList, BillingResult result)
-		{
-			if (callback != null)
-			{
-				try
-				{
-					JSONArray productsArray = new JSONArray();
-
-					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-					{
-						if (productList != null)
-						{
-							for (ProductDetails product : productList)
-								productsArray.put(productDetailsToJson(product));
-						}
-					}
-
-					JSONObject jsonResp = new JSONObject();
-					jsonResp.put("products", productsArray);
-					callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-
-		public void onQueryPurchasesFinished(List<Purchase> purchaseList)
-		{
-			if (callback != null)
-			{
-				try
-				{
-					JSONArray purchasesArray = new JSONArray();
-
-					if (purchaseList != null)
-					{
-						for (Purchase purchase : purchaseList)
-						{
-							if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-							{
-								JSONObject purchaseJson = new JSONObject();
-								purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-								purchaseJson.put("signature", purchase.getSignature());
-								purchasesArray.put(purchaseJson);
-							}
-						}
-					}
-
-					JSONObject jsonResp = new JSONObject();
-					jsonResp.put("purchases", purchasesArray);
-					callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-
-		public void onError(String errorMessage)
-		{
-			if (callback != null)
-				callback.call("onError", new Object[] { errorMessage });
 		}
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
