@@ -4,6 +4,8 @@
 
 	<app main="Main" path="export" file="EITest" />
 
+	<certificate path="certificates/iab-test-release-key.keystore" alias="iabTestK" password="iabtest01" if="android" >
+
 	<source path="source" />
 
 	<haxelib name="lime" />
