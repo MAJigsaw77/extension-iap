@@ -4,13 +4,8 @@ import com.android.billingclient.api.*;
 import org.haxe.extension.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.json.*;
+import java.util.*;
 
 public class IAP extends Extension
 {
@@ -238,20 +233,36 @@ public class IAP extends Extension
 
 	public static void consume(final String purchaseJson, final String signature)
 	{
-		final Purchase purchase = new Purchase(purchaseJson, signature);
-		consumeInProgress.put(purchase.getPurchaseToken(), purchase);
-		billingManager.consumeAsync(purchase.getPurchaseToken());
+		try
+		{
+			final Purchase purchase = new Purchase(purchaseJson, signature);
+
+			consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+
+			billingManager.consumeAsync(purchase.getPurchaseToken());
+		}
+		catch (Exception e)
+		{
+			callback.call("onError", new Object[] { e.getMessage() });
+		}
 	}
 
 	public static void acknowledgePurchase(final String purchaseJson, final String signature)
 	{
-		final Purchase purchase = new Purchase(purchaseJson, signature);
-
-		if (!purchase.isAcknowledged())
+		try
 		{
-			acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
+			final Purchase purchase = new Purchase(purchaseJson, signature);
 
-			billingManager.acknowledgePurchase(purchase.getPurchaseToken());
+			if (!purchase.isAcknowledged())
+			{
+				acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
+
+				billingManager.acknowledgePurchase(purchase.getPurchaseToken());
+			}
+		}
+		catch (Exception e)
+		{
+			callback.call("onError", new Object[] { e.getMessage() });
 		}
 	}
 
