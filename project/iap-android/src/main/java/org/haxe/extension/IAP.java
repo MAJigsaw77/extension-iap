@@ -1,10 +1,7 @@
 package org.haxe.extension;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.ProductDetails;
-import org.haxe.extension.util.BillingManager;
+import com.android.billingclient.api.*;
+import org.haxe.extension.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import org.json.JSONArray;
@@ -217,47 +214,26 @@ public class IAP extends Extension
 		}
 	}
 
-	private static String TAG = "InAppPurchase";
 	private static HaxeObject callback = null;
 	private static BillingManager billingManager = null;
-	private static String publicKey = "";
-	private static UpdateListener updateListener = null;
 	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
 	private static Map<String, Purchase> acknowledgePurchaseInProgress = new HashMap<String, Purchase>();
 
 	public static void init(String publicKey, HaxeObject callback)
 	{
 		IAP.callback = callback;
-		IAP.publicKey = publicKey;
 
-		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
-
-		updateListener = new UpdateListener();
-		billingManager = new BillingManager(Extension.mainActivity, updateListener);
+		billingManager = new BillingManager(mainActivity, new UpdateListener(), publicKey);
 	}
 
 	public static void purchase(final String productID)
 	{
-		Extension.mainActivity.runOnUiThread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				billingManager.initiatePurchaseFlow(productID);
-			}
-		});
+		mainActivity.runOnUiThread(() -> billingManager.initiatePurchaseFlow(productID));
 	}
 
 	public static void subscribe(final String productID)
 	{
-		Extension.mainActivity.runOnUiThread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				billingManager.initiateSubscriptionFlow(productID);
-			}
-		});
+		mainActivity.runOnUiThread(() -> billingManager.initiateSubscriptionFlow(productID));
 	}
 
 	public static void consume(final String purchaseJson, final String signature)
