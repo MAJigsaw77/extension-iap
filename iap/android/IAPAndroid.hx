@@ -20,6 +20,12 @@ class IAPAndroid
 	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
 
 	/**
+	 * Event dispatched when an debug log occurs during IAP processing.
+	 * @param message A string representing the message.
+	 */
+	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
+
+	/**
 	 * Event dispatched when a purchase is successfully consumed.
 	 * @param purchase The IAPPurchase object representing the consumed purchase.
 	 */
@@ -46,43 +52,29 @@ class IAPAndroid
 	public static var onFailedAcknowledgePurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
 
 	/**
-	 * Event dispatched when a purchase is completed.
-	 * @param purchase The IAPPurchase object representing the completed purchase.
+	 * Event dispatched when purchase details are finished being queried.
+	 * @param purchases An array of IAPPurchase objects representing the queried purchases.
 	 */
-	public static var onPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
-
-	/**
-	 * Event dispatched when a purchase is canceled.
-	 * @param purchase The IAPPurchase object representing the canceled purchase.
-	 */
-	public static var onCanceledPurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
-
-	/**
-	 * Event dispatched when a purchase fails.
-	 * @param error A string representing the error message.
-	 * @param purchase The IAPPurchase object representing the failed purchase.
-	 */
-	public static var onFailedPurchase(default, null):Event<String->IAPPurchase->Void> = new Event<String->IAPPurchase->Void>();
-
-	/**
-	 * Event dispatched when product details are finished being queried.
-	 * @param result An array of IAPProductDetails objects representing the queried product details.
-	 */
-	public static var onQueryProductDetailsFinished(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+	public static var onQueryInAppPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	/**
 	 * Event dispatched when purchase details are finished being queried.
 	 * @param purchases An array of IAPPurchase objects representing the queried purchases.
 	 */
-	public static var onQueryPurchasesFinished(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
+	public static var onQuerySubsPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	/**
-	 * Event dispatched when an error occurs during IAP processing.
-	 * @param message A string representing the error message.
+	 * Event dispatched when product details are finished being queried.
+	 * @param result An array of IAPProductDetails objects representing the queried product details.
 	 */
-	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
 
-	// Flag to indicate if the IAP system has been initialized.
+	/**
+	 * Event dispatched when product details are finished being queried.
+	 * @param result An array of IAPProductDetails objects representing the queried product details.
+	 */
+	public static var onQuerySubsProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+
 	@:noCompletion
 	private static var initialized:Bool = false;
 
@@ -264,6 +256,103 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	}
 
 	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onDebugLog(message:String):Void
+	{
+		IAPAndroid.onDebugLog.dispatch(message);
+	}
+
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQueryInAppPurchases(result:String):Void
+	{
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
+		{
+			final purchases:Array<IAPPurchase> = [];
+
+			if (parsedResult.purchases != null)
+			{
+				for (purchase in (parsedResult.purchases : Array<Dynamic>))
+					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
+			}
+
+			IAPAndroid.onQueryInAppPurchases.dispatch(purchases);
+		}
+	}
+
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQuerySubsPurchases(result:String):Void
+	{
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
+		{
+			final purchases:Array<IAPPurchase> = [];
+
+			if (parsedResult.purchases != null)
+			{
+				for (purchase in (parsedResult.purchases : Array<Dynamic>))
+					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
+			}
+
+			IAPAndroid.onQuerySubsPurchases.dispatch(purchases);
+		}
+	}
+
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQueryInAppProductDetails(result:String):Void
+	{
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
+		{
+			final productsDetails:Array<IAPProductDetails> = [];
+
+			if (parsedResult.purchases != null)
+			{
+				for (productDetails in (parsedResult.purchases : Array<Dynamic>))
+					productsDetails.push(new IAPProductDetails(productDetails));
+			}
+
+			IAPAndroid.onQueryInAppProductDetails.dispatch(productsDetails);
+		}
+	}
+
+	@:keep
+	#if (lime >= "8.0.0")
+	@:runOnMainThread
+	#end
+	public function onQuerySubsProductDetails(result:String):Void
+	{
+		final parsedResult:Dynamic = haxe.Json.parse(result);
+
+		if (parsedResult != null)
+		{
+			final productsDetails:Array<IAPProductDetails> = [];
+
+			if (parsedResult.purchases != null)
+			{
+				for (productDetails in (parsedResult.purchases : Array<Dynamic>))
+					productsDetails.push(new IAPProductDetails(productDetails));
+			}
+
+			IAPAndroid.onQuerySubsProductDetails.dispatch(productsDetails);
+		}
+	}
+
+	@:keep
 	@:runOnMainThread public function onConsume(purchase:String, signature:String):Void
 	{
 		IAPAndroid.onConsume.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
@@ -300,89 +389,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 		if (error != null)
 			IAPAndroid.onFailedAcknowledgePurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onPurchase(purchase:String, signature:String):Void
-	{
-		IAPAndroid.onPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onCanceledPurchase(purchase:String, signature:String):Void
-	{
-		IAPAndroid.onCanceledPurchase.dispatch(new IAPPurchase(haxe.Json.parse(purchase), signature));
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onFailedPurchase(error:String):Void
-	{
-		final error:Dynamic = haxe.Json.parse(error);
-
-		if (error != null)
-			IAPAndroid.onFailedPurchase.dispatch(error.result, new IAPPurchase(error.purchase.originalJson, error.purchase.signature));
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onQueryProductDetailsFinished(result:String):Void
-	{
-		final parsedResult:Dynamic = haxe.Json.parse(result);
-
-		if (parsedResult != null)
-		{
-			final productsDetails:Array<IAPProductDetails> = [];
-
-			if (parsedResult.purchases != null)
-			{
-				for (productDetails in (parsedResult.purchases : Array<Dynamic>))
-					productsDetails.push(new IAPProductDetails(productDetails));
-			}
-
-			IAPAndroid.onQueryProductDetailsFinished.dispatch(productsDetails);
-		}
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onQueryPurchasesFinished(result:String):Void
-	{
-		final parsedResult:Dynamic = haxe.Json.parse(result);
-
-		if (parsedResult != null)
-		{
-			final purchases:Array<IAPPurchase> = [];
-
-			if (parsedResult.purchases != null)
-			{
-				for (purchase in (parsedResult.purchases : Array<Dynamic>))
-					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
-			}
-
-			IAPAndroid.onQueryPurchasesFinished.dispatch(purchases);
-		}
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onDebugLog(message:String):Void
-	{
-		IAPAndroid.onDebugLog.dispatch(message);
 	}
 }
 #end
