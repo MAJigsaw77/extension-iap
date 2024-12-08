@@ -10,7 +10,8 @@ public class BillingManager
 	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final String mBase64EncodedPublicKey;
 
-	private final List<Purchase> mPurchases = Collections.synchronizedList(new ArrayList<>());
+	private final List<Purchase> mInAppPurchases = Collections.synchronizedList(new ArrayList<>());
+	private final List<Purchase> mSubscriptionPurchases = Collections.synchronizedList(new ArrayList<>());
 
 	private final Map<String, ProductDetails> mInAppProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 	private final Map<String, ProductDetails> mSubscriptionProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
@@ -22,13 +23,17 @@ public class BillingManager
 
 	public interface BillingUpdatesListener
 	{
-		void onBillingClientSetupFinished(Boolean success);
-		void onQueryPurchasesFinished(List<Purchase> purchases);
-		void onConsumeFinished(String token, BillingResult result);
-		void onAcknowledgePurchaseFinished(String token, BillingResult result);
-		void onPurchasesUpdated(List<Purchase> purchases, BillingResult result);
-		void onQueryProductDetailsFinished(List<ProductDetails> productDetailsList, BillingResult result);
-		void onError(String errorMessage);
+		void onBillingClientSetup(Boolean success);
+		void onBillingClientError(String errorMessage);
+
+		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
+		void onQuerySubsPurchases(List<Purchase> subscriptionPurchases);
+
+		void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
+		void onQuerySubsDetails(List<ProductDetails> productDetailsList, BillingResult result);
+
+		void onConsume(String token, BillingResult result);
+		void onAcknowledgePurchase(String token, BillingResult result);
 	}
 
 	public BillingManager(Activity activity, final BillingUpdatesListener updatesListener, final String publicKey)
@@ -45,18 +50,7 @@ public class BillingManager
 				public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases)
 				{
 					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-					{
-						synchronized (mPurchases)
-						{
-							mPurchases.clear();
-							mPurchases.addAll(purchases);
-						}
-
-						for (Purchase purchase : purchases)
-							handlePurchase(purchase);
-					}
-					
-					mBillingUpdatesListener.onPurchasesUpdated(purchases, result);
+						categorizePurchases();
 				}
 			}).build();
 
@@ -67,7 +61,7 @@ public class BillingManager
 				{
 					mIsServiceConnected = billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK;
 
-					mBillingUpdatesListener.onBillingClientSetupFinished(mIsServiceConnected);
+					mBillingUpdatesListener.onBillingClientSetup(mIsServiceConnected);
 
 					if (!mIsServiceConnected)
 						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
@@ -78,7 +72,7 @@ public class BillingManager
 				{
 					mIsServiceConnected = false;
 
-					mBillingUpdatesListener.onBillingClientSetupFinished(mIsServiceConnected);
+					mBillingUpdatesListener.onBillingClientSetup(mIsServiceConnected);
 				}
 			});
 		}
@@ -156,7 +150,7 @@ public class BillingManager
 				inAppProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.INAPP).build());
 
 			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(inAppProductList).build(), (billingResult, productDetailsList) -> {
-				mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
+				mBillingUpdatesListener.onQueryInAppProductDetails(productDetailsList, billingResult);
 
 				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
@@ -185,7 +179,7 @@ public class BillingManager
 					subsProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.SUBS).build());
 
 				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build(), (billingResult, productDetailsList) -> {
-					mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
+					mBillingUpdatesListener.onQuerySubsDetails(productDetailsList, billingResult);
 
 					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 					{
@@ -213,18 +207,20 @@ public class BillingManager
 			{
 				public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
 				{
-					if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK)
-						return;
-
-					synchronized (mPurchases)
+					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 					{
-						mPurchases.clear();
+						synchronized (mInAppPurchases)
+						{
+							mInAppPurchases.clear();
 
-						if (purchases != null)
-							mPurchases.addAll(purchases);
+							if (purchases != null)
+								mInAppPurchases.addAll(purchases);
+
+							mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
+						}
 					}
-
-					mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
+					else
+						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
 				}
 			});
 		}
@@ -244,18 +240,20 @@ public class BillingManager
 				{
 					public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
 					{
-						if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK)
-							return;
-
-						synchronized (mPurchases)
+						if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 						{
-							mPurchases.clear();
+							synchronized (mSubscriptionPurchases)
+							{
+								mSubscriptionPurchases.clear();
 
-							if (purchases != null)
-								mPurchases.addAll(purchases);
+								if (purchases != null)
+									mSubscriptionPurchases.addAll(purchases);
+
+								mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
+							}
 						}
-
-						mBillingUpdatesListener.onQueryPurchasesFinished(purchases);
+						else
+							mBillingUpdatesListener.onError(billingResult.getDebugMessage());
 					}
 				});
 			}
@@ -284,7 +282,7 @@ public class BillingManager
 					mTokensToBeConsumed.remove(token);
 				}
 
-				mBillingUpdatesListener.onConsumeFinished(token, billingResult);
+				mBillingUpdatesListener.onConsume(token, billingResult);
 			});
 		}
 		catch (Exception e)
@@ -311,7 +309,7 @@ public class BillingManager
 					mTokensToBeAcknowledged.remove(purchaseToken);
 				}
 
-				mBillingUpdatesListener.onAcknowledgePurchaseFinished(purchaseToken, billingResult);
+				mBillingUpdatesListener.onAcknowledgePurchase(purchaseToken, billingResult);
 			});
 		}
 		catch (Exception e)
@@ -320,25 +318,69 @@ public class BillingManager
 		}
 	}
 
-	private void handlePurchase(Purchase purchase)
+	private void categorizePurchases(List<Purchase> purchases)
+	{
+		if (purchases == null)
+			return;
+
+		synchronized (mInAppPurchases)
+		{
+			mInAppPurchases.clear();
+		}
+
+		synchronized (mSubscriptionPurchases)
+		{
+			mSubscriptionPurchases.clear();
+		}
+
+		for (Purchase purchase : purchases)
+		{
+			if (verifyPurchase(purchase))
+			{
+				if (purchase.getProducts().contains(BillingClient.ProductType.INAPP))
+				{
+					synchronized (mInAppPurchases)
+					{
+						mInAppPurchases.add(purchase);
+					}
+				}
+				else if (purchase.getProducts().contains(BillingClient.ProductType.SUBS))
+				{
+					synchronized (mSubscriptionPurchases)
+					{
+						mSubscriptionPurchases.add(purchase);
+					}
+				}
+			}
+		}
+
+		synchronized (mInAppPurchases)
+		{
+			mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
+		}
+
+		synchronized (mSubscriptionPurchases)
+		{
+			mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
+		}
+	}
+
+	private boolean verifyPurchase(Purchase purchase)
 	{
 		try
 		{
 			if (!Security.verifyPurchase(mBase64EncodedPublicKey, purchase.getOriginalJson(), purchase.getSignature()))
 			{
 				mBillingUpdatesListener.onError("Invalid purchase signature.");
-				return;
+				return false;
 			}
 		}
 		catch (Exception e)
 		{
 			mBillingUpdatesListener.onError("Failed to verify purchase signature: " + e.getMessage());
-			return;
+			return false;
 		}
 
-		synchronized (mPurchases)
-		{
-			mPurchases.add(purchase);
-		}
+		return true;
 	}
 }
