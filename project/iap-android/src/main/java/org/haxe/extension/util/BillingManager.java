@@ -4,7 +4,7 @@ import android.app.Activity;
 import com.android.billingclient.api.*;
 import java.util.*;
 
-public class BillingManager implements PurchasesUpdatedListener
+public class BillingManager
 {
 	private final Activity mActivity;
 	private final BillingUpdatesListener mBillingUpdatesListener;
