@@ -10,7 +10,8 @@ public class BillingManager
 	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final String mBase64EncodedPublicKey;
 	private final List<Purchase> mPurchases = Collections.synchronizedList(new ArrayList<>());
-	private final Map<String, ProductDetails> mProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, ProductDetails> mInAppProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, ProductDetails> mSubscriptionProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 
 	private BillingClient mBillingClient;
 	private boolean mIsServiceConnected;
@@ -104,7 +105,7 @@ public class BillingManager
 	{
 		try
 		{
-			final ProductDetails productDetail = mProductDetailsMap.get(productId);
+			final ProductDetails productDetail = mInAppProductDetailsMap.get(productId);
 
 			if (productDetail == null)
 				queryInAppProductDetailsAsync(Collections.singletonList(productId));
@@ -125,7 +126,7 @@ public class BillingManager
 	{
 		try
 		{
-			final ProductDetails productDetail = mProductDetailsMap.get(productId);
+			final ProductDetails productDetail = mSubscriptionProductDetailsMap.get(productId);
 
 			if (productDetail == null)
 				querySubsProductDetailsAsync(Collections.singletonList(productId));
@@ -157,12 +158,10 @@ public class BillingManager
 				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
 					for (ProductDetails productDetails : productDetailsList)
-						mProductDetailsMap.put(productDetails.getProductId(), productDetails);
+						mInAppProductDetailsMap.put(productDetails.getProductId(), productDetails);
 				}
 				else
-				{
 					mBillingUpdatesListener.onError(billingResult.getDebugMessage());
-				}
 			});
 		}
 		catch (Exception e)
@@ -180,12 +179,7 @@ public class BillingManager
 				List<QueryProductDetailsParams.Product> subsProductList = new ArrayList<>();
 
 				for (String productId : productList)
-				{
-					subsProductList.add(QueryProductDetailsParams.Product.newBuilder()
-						.setProductId(productId)
-						.setProductType(BillingClient.ProductType.SUBS)
-						.build());
-				}
+					subsProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.SUBS).build());
 
 				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build(), (billingResult, productDetailsList) -> {
 					mBillingUpdatesListener.onQueryProductDetailsFinished(productDetailsList, billingResult);
@@ -193,18 +187,14 @@ public class BillingManager
 					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 					{
 						for (ProductDetails productDetails : productDetailsList)
-							mProductDetailsMap.put(productDetails.getProductId(), productDetails);
+							mSubscriptionProductDetailsMap.put(productDetails.getProductId(), productDetails);
 					}
 					else
-					{
 						mBillingUpdatesListener.onError(billingResult.getDebugMessage());
-					}
 				});
 			}
 			else
-			{
 				mBillingUpdatesListener.onError("Subscriptions feature is not supported.");
-			}
 		}
 		catch (Exception e)
 		{
