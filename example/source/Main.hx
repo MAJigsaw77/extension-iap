@@ -48,9 +48,9 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No purchases found.", android.widget.Toast.LENGTH_SHORT);
+				android.widget.Toast.makeText("No inapp purchases found.", android.widget.Toast.LENGTH_SHORT);
 				#else
-				lime.utils.Log.info("No purchases found.");
+				lime.utils.Log.info("No inapp purchases found.");
 				#end
 			}
 		});
@@ -71,9 +71,9 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No purchases found.", android.widget.Toast.LENGTH_SHORT);
+				android.widget.Toast.makeText("No subs purchases found.", android.widget.Toast.LENGTH_SHORT);
 				#else
-				lime.utils.Log.info("No purchases found.");
+				lime.utils.Log.info("No subs purchases found.");
 				#end
 			}
 		});
@@ -94,9 +94,9 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No products found.", android.widget.Toast.LENGTH_SHORT);
+				android.widget.Toast.makeText("No inapp products found.", android.widget.Toast.LENGTH_SHORT);
 				#else
-				lime.utils.Log.info("No products found.");
+				lime.utils.Log.info("No inapp products found.");
 				#end
 			}
 		});
@@ -117,9 +117,9 @@ class Main extends lime.app.Application
 			else
 			{
 				#if android
-				android.widget.Toast.makeText("No products found.", android.widget.Toast.LENGTH_SHORT);
+				android.widget.Toast.makeText("No subs products found.", android.widget.Toast.LENGTH_SHORT);
 				#else
-				lime.utils.Log.info("No products found.");
+				lime.utils.Log.info("No subs products found.");
 				#end
 			}
 		});
