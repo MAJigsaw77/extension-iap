@@ -111,7 +111,7 @@ public class IAP extends Extension
 		public void onBillingClientSetup(Boolean success)
 		{
 			if (callback != null)
-				callback.call("onStarted", new Object[] { success });
+				callback.call("onSetup", new Object[] { success });
 		}
 
 		public void onBillingClientDebugLog(String message)

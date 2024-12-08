@@ -8,7 +8,7 @@ class Main extends lime.app.Application
 	{
 		super();
 
-		iap.IAP.onStarted.add(function(success:Bool):Void
+		iap.IAP.onSetup.add(function(success:Bool):Void
 		{
 			if (success)
 				iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);

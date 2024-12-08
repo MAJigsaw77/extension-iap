@@ -14,10 +14,10 @@ import lime.utils.Log;
 class IAPAndroid
 {
 	/**
-	 * Event dispatched when the IAP system initialization starts.
+	 * Event dispatched on the IAP system initialization setup.
 	 * @param status A boolean indicating the initialization status.
 	 */
-	public static var onStarted(default, null):Event<Bool->Void> = new Event<Bool->Void>();
+	public static var onSetup(default, null):Event<Bool->Void> = new Event<Bool->Void>();
 
 	/**
 	 * Event dispatched when an debug log occurs during IAP processing.
@@ -250,9 +250,9 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 
 	@:keep
 	@:runOnMainThread
-	public function onStarted(status:Bool):Void
+	public function onSetup(status:Bool):Void
 	{
-		IAPAndroid.onStarted.dispatch(status);
+		IAPAndroid.onSetup.dispatch(status);
 	}
 
 	@:keep
