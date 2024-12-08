@@ -218,10 +218,9 @@ public class BillingManager implements PurchasesUpdatedListener
 		{
 			mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), new PurchasesResponseListener()
 			{
-				@Override
 				public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
 				{
-					if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
+					if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK)
 						return;
 
 					synchronized (mPurchases)
@@ -250,10 +249,9 @@ public class BillingManager implements PurchasesUpdatedListener
 			{
 				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), new PurchasesResponseListener()
 				{
-					@Override
 					public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
 					{
-						if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
+						if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK)
 							return;
 
 						synchronized (mPurchases)
