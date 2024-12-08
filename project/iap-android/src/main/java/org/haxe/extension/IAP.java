@@ -9,11 +9,105 @@ import java.util.*;
 
 public class IAP extends Extension
 {
-	private static class UpdateListener implements BillingManager.BillingUpdatesListener
+	private static HaxeObject callback = null;
+	private static BillingManager billingManager = null;
+	private static Map<String, Purchase> consumeInProgress = Collections.synchronizedMap(new WeakHashMap<>());
+	private static Map<String, Purchase> acknowledgePurchaseInProgress = Collections.synchronizedMap(new WeakHashMap<>());
+
+	public static void init(String publicKey, HaxeObject callback)
+	{
+		IAP.callback = callback;
+
+		billingManager = new BillingManager(mainActivity, new IAPUpdateListener(), publicKey);
+	}
+
+	public static void purchase(final String productID)
+	{
+		if (billingManager != null)
+			mainActivity.runOnUiThread(() -> billingManager.initiatePurchaseFlow(productID));
+	}
+
+	public static void subscribe(final String productID)
+	{
+		if (billingManager != null)
+			mainActivity.runOnUiThread(() -> billingManager.initiateSubscriptionFlow(productID));
+	}
+
+	public static void consume(final String purchaseJson, final String signature)
+	{
+		try
+		{
+			final Purchase purchase = new Purchase(purchaseJson, signature);
+
+			consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+
+			billingManager.consumeAsync(purchase.getPurchaseToken());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static void acknowledgePurchase(final String purchaseJson, final String signature)
+	{
+		try
+		{
+			final Purchase purchase = new Purchase(purchaseJson, signature);
+
+			if (!purchase.isAcknowledged())
+			{
+				acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
+
+				billingManager.acknowledgePurchase(purchase.getPurchaseToken());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static void queryInAppProductDetailsAsync(String[] ids)
+	{
+		if (billingManager != null)
+			billingManager.queryInAppProductDetailsAsync(Arrays.asList(ids));
+	}
+
+	public static void querySubsProductDetailsAsync(String[] ids)
+	{
+		if (billingManager != null)
+			billingManager.querySubsProductDetailsAsync(Arrays.asList(ids));
+	}
+
+	public static void queryInAppPurchasesAsync()
+	{
+		if (billingManager != null)
+			billingManager.queryInAppPurchasesAsync();
+	}
+
+	public static void querySubsPurchasesAsync()
+	{
+		if (billingManager != null)
+			billingManager.querySubsPurchasesAsync();
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		if (billingManager != null)
+		{
+			billingManager.destroy();
+			billingManager = null;
+		}
+	}
+
+	private static class IAPUpdateListener implements BillingManager.BillingUpdatesListener
 	{
 		public void onBillingClientSetupFinished(Boolean success)
 		{
-			callback.call("onStarted", new Object[] { success });
+			if (callback != null)
+				callback.call("onStarted", new Object[] { success });
 		}
 
 		public void onConsumeFinished(String token, BillingResult result)
@@ -22,10 +116,13 @@ public class IAP extends Extension
 
 			consumeInProgress.remove(token);
 
-			if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-				callback.call("onConsume", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
-			else
-				callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
+			if (callback != null)
+			{
+				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					callback.call("onConsume", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
+				else
+					callback.call("onFailedConsume", new Object[] { createErrorJson(result, purchase) });
+			}
 		}
 
 		public void onAcknowledgePurchaseFinished(String token, BillingResult result)
@@ -34,15 +131,18 @@ public class IAP extends Extension
 
 			acknowledgePurchaseInProgress.remove(token);
 
-			if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-				callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
-			else
-				callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
+			if (callback != null)
+			{
+				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					callback.call("onAcknowledgePurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature() });
+				else
+					callback.call("onFailedAcknowledgePurchase", new Object[] { createErrorJson(result, purchase) });
+			}
 		}
 
 		public void onPurchasesUpdated(List<Purchase> purchaseList, BillingResult result)
 		{
-			if (purchaseList != null)
+			if (callback != null && purchaseList != null)
 			{
 				for (Purchase purchase : purchaseList)
 				{
@@ -61,62 +161,69 @@ public class IAP extends Extension
 
 		public void onQueryProductDetailsFinished(List<ProductDetails> productList, BillingResult result)
 		{
-			try
+			if (callback != null)
 			{
-				JSONArray productsArray = new JSONArray();
-
-				if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+				try
 				{
-					if (productList != null)
-					{
-						for (ProductDetails product : productList)
-							productsArray.put(productDetailsToJson(product));
-					}
-				}
+					JSONArray productsArray = new JSONArray();
 
-				JSONObject jsonResp = new JSONObject();
-				jsonResp.put("products", productsArray);
-				callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
+					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
+					{
+						if (productList != null)
+						{
+							for (ProductDetails product : productList)
+								productsArray.put(productDetailsToJson(product));
+						}
+					}
+
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("products", productsArray);
+					callback.call("onQueryProductDetailsFinished", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 
 		public void onQueryPurchasesFinished(List<Purchase> purchaseList)
 		{
-			try
+			if (callback != null)
 			{
-				JSONArray purchasesArray = new JSONArray();
-
-				if (purchaseList != null)
+				try
 				{
-					for (Purchase purchase : purchaseList)
+					JSONArray purchasesArray = new JSONArray();
+
+					if (purchaseList != null)
 					{
-						if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+						for (Purchase purchase : purchaseList)
 						{
-							JSONObject purchaseJson = new JSONObject();
-							purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-							purchaseJson.put("signature", purchase.getSignature());
-							purchasesArray.put(purchaseJson);
+							if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
+							{
+								JSONObject purchaseJson = new JSONObject();
+								purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
+								purchaseJson.put("signature", purchase.getSignature());
+								purchasesArray.put(purchaseJson);
+							}
 						}
 					}
-				}
 
-				JSONObject jsonResp = new JSONObject();
-				jsonResp.put("purchases", purchasesArray);
-				callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
+					JSONObject jsonResp = new JSONObject();
+					jsonResp.put("purchases", purchasesArray);
+					callback.call("onQueryPurchasesFinished", new Object[] { jsonResp.toString() });
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 
 		public void onError(String errorMessage)
 		{
-			callback.call("onError", new Object[] { errorMessage });
+			if (callback != null)
+				callback.call("onError", new Object[] { errorMessage });
 		}
 
 		private JSONObject createErrorJson(BillingResult result, Purchase purchase)
@@ -206,93 +313,6 @@ public class IAP extends Extension
 			}
 
 			return resultObject;
-		}
-	}
-
-	private static HaxeObject callback = null;
-	private static BillingManager billingManager = null;
-	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
-	private static Map<String, Purchase> acknowledgePurchaseInProgress = new HashMap<String, Purchase>();
-
-	public static void init(String publicKey, HaxeObject callback)
-	{
-		IAP.callback = callback;
-
-		billingManager = new BillingManager(mainActivity, new UpdateListener(), publicKey);
-	}
-
-	public static void purchase(final String productID)
-	{
-		mainActivity.runOnUiThread(() -> billingManager.initiatePurchaseFlow(productID));
-	}
-
-	public static void subscribe(final String productID)
-	{
-		mainActivity.runOnUiThread(() -> billingManager.initiateSubscriptionFlow(productID));
-	}
-
-	public static void consume(final String purchaseJson, final String signature)
-	{
-		try
-		{
-			final Purchase purchase = new Purchase(purchaseJson, signature);
-
-			consumeInProgress.put(purchase.getPurchaseToken(), purchase);
-
-			billingManager.consumeAsync(purchase.getPurchaseToken());
-		}
-		catch (Exception e)
-		{
-			callback.call("onError", new Object[] { e.getMessage() });
-		}
-	}
-
-	public static void acknowledgePurchase(final String purchaseJson, final String signature)
-	{
-		try
-		{
-			final Purchase purchase = new Purchase(purchaseJson, signature);
-
-			if (!purchase.isAcknowledged())
-			{
-				acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
-
-				billingManager.acknowledgePurchase(purchase.getPurchaseToken());
-			}
-		}
-		catch (Exception e)
-		{
-			callback.call("onError", new Object[] { e.getMessage() });
-		}
-	}
-
-	public static void queryInAppProductDetailsAsync(String[] ids)
-	{
-		billingManager.queryInAppProductDetailsAsync(Arrays.asList(ids));
-	}
-
-	public static void querySubsProductDetailsAsync(String[] ids)
-	{
-		billingManager.querySubsProductDetailsAsync(Arrays.asList(ids));
-	}
-
-	public static void queryInAppPurchasesAsync()
-	{
-		billingManager.queryInAppPurchasesAsync();
-	}
-
-	public static void querySubsPurchasesAsync()
-	{
-		billingManager.querySubsPurchasesAsync();
-	}
-
-	@Override
-	public void onDestroy()
-	{
-		if (billingManager != null)
-		{
-			billingManager.destroy();
-			billingManager = null;
 		}
 	}
 }
