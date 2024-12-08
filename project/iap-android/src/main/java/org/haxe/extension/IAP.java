@@ -5,13 +5,12 @@ import org.haxe.extension.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import org.json.*;
-import java.util.concurrent.*;
 import java.util.*;
 
 public class IAP extends Extension
 {
-	private static final Map<String, Purchase> consumeInProgress = new ConcurrentHashMap<>();
-	private static final Map<String, Purchase> acknowledgePurchaseInProgress = new ConcurrentHashMap<>();
+	private static final Map<String, Purchase> consumeInProgress = Collections.synchronizedMap(new HashMap<>());
+	private static final Map<String, Purchase> acknowledgePurchaseInProgress = Collections.synchronizedMap(new HashMap<>());
 
 	private static HaxeObject callback = null;
 	private static BillingManager billingManager = null;
