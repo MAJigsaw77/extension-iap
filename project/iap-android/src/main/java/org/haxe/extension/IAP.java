@@ -18,8 +18,7 @@ public class IAP extends Extension
 	public static void init(String publicKey, HaxeObject callback)
 	{
 		IAP.callback = callback;
-
-		billingManager = new BillingManager(mainActivity, new IAPUpdateListener(), publicKey);
+		IAP.billingManager = new BillingManager(mainActivity, new IAPUpdateListener(), publicKey);
 	}
 
 	public static void purchase(final String productID)
