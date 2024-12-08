@@ -5,6 +5,7 @@ import org.haxe.extension.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import org.json.*;
+import java.util.concurrent.*;
 import java.util.*;
 
 public class IAP extends Extension
@@ -214,7 +215,7 @@ public class IAP extends Extension
 			}
 		}
 
-		public void onQuerySubsProductDetails(List<ProductDetails> productList, BillingResult result)
+		public void onQuerySubsProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
 		{
 			if (callback != null)
 			{
