@@ -238,36 +238,20 @@ public class IAP extends Extension
 
 	public static void consume(final String purchaseJson, final String signature)
 	{
-		try
-		{
-			final Purchase purchase = new Purchase(purchaseJson, signature);
-
-			consumeInProgress.put(purchase.getPurchaseToken(), purchase);
-
-			billingManager.consumeAsync(purchase.getPurchaseToken());
-		}
-		catch (Exception e)
-		{
-			callback.call("onError", new Object[] { e.getMessage() });
-		}
+		final Purchase purchase = new Purchase(purchaseJson, signature);
+		consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+		billingManager.consumeAsync(purchase.getPurchaseToken());
 	}
 
 	public static void acknowledgePurchase(final String purchaseJson, final String signature)
 	{
-		try
-		{
-			final Purchase purchase = new Purchase(purchaseJson, signature);
+		final Purchase purchase = new Purchase(purchaseJson, signature);
 
-			if (!purchase.isAcknowledged())
-			{
-				acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
-
-				billingManager.acknowledgePurchase(purchase.getPurchaseToken());
-			}
-		}
-		catch (Exception e)
+		if (!purchase.isAcknowledged())
 		{
-			callback.call("onError", new Object[] { e.getMessage() });
+			acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
+
+			billingManager.acknowledgePurchase(purchase.getPurchaseToken());
 		}
 	}
 
