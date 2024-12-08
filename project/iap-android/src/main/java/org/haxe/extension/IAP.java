@@ -9,10 +9,11 @@ import java.util.*;
 
 public class IAP extends Extension
 {
+	private static final Map<String, Purchase> consumeInProgress = new ConcurrentHashMap<>();
+	private static final Map<String, Purchase> acknowledgePurchaseInProgress = new ConcurrentHashMap<>();
+
 	private static HaxeObject callback = null;
 	private static BillingManager billingManager = null;
-	private static Map<String, Purchase> consumeInProgress = Collections.synchronizedMap(new WeakHashMap<>());
-	private static Map<String, Purchase> acknowledgePurchaseInProgress = Collections.synchronizedMap(new WeakHashMap<>());
 
 	public static void init(String publicKey, HaxeObject callback)
 	{
@@ -39,9 +40,12 @@ public class IAP extends Extension
 		{
 			final Purchase purchase = new Purchase(purchaseJson, signature);
 
-			consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+			if (billingManager != null && !consumeInProgress.containsKey(purchase.getPurchaseToken()))
+			{
+				consumeInProgress.put(purchase.getPurchaseToken(), purchase);
 
-			billingManager.consumeAsync(purchase.getPurchaseToken());
+				billingManager.consumeAsync(purchase.getPurchaseToken());
+			}
 		}
 		catch (Exception e)
 		{
@@ -55,7 +59,7 @@ public class IAP extends Extension
 		{
 			final Purchase purchase = new Purchase(purchaseJson, signature);
 
-			if (!purchase.isAcknowledged())
+			if (!purchase.isAcknowledged() && (billingManager != null && !acknowledgePurchaseInProgress.containsKey(purchase.getPurchaseToken())))
 			{
 				acknowledgePurchaseInProgress.put(purchase.getPurchaseToken(), purchase);
 
