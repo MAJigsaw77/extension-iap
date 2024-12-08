@@ -24,9 +24,6 @@ public class BillingManager
 		void onBillingClientSetup(Boolean success);
 		void onBillingClientDebugLog(String errorMessage);
 
-		void onInAppPurchasesUpdated(List<Purchase> inAppPurchases);
-		void onSubsPurchasesUpdated(List<Purchase> subscriptionPurchases);
-
 		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
 		void onQuerySubsPurchases(List<Purchase> subscriptionPurchases);
 
@@ -85,12 +82,12 @@ public class BillingManager
 
 						synchronized (mInAppPurchases)
 						{
-							mBillingUpdatesListener.onInAppPurchasesUpdated(new ArrayList<>(mInAppPurchases));
+							mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
 						}
 
 						synchronized (mSubscriptionPurchases)
 						{
-							mBillingUpdatesListener.onSubsPurchasesUpdated(new ArrayList<>(mSubscriptionPurchases));
+							mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
 						}
 					}
 					else
