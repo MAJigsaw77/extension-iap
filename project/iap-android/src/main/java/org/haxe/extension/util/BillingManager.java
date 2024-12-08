@@ -6,8 +6,9 @@ import java.util.*;
 
 public class BillingManager implements PurchasesUpdatedListener
 {
-	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final Activity mActivity;
+	private final BillingUpdatesListener mBillingUpdatesListener;
+	private final String mBase64EncodedPublicKey;
 	private final List<Purchase> mPurchases = Collections.synchronizedList(new ArrayList<>());
 	private final Map<String, ProductDetails> mProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 
@@ -15,8 +16,6 @@ public class BillingManager implements PurchasesUpdatedListener
 	private boolean mIsServiceConnected;
 	private Set<String> mTokensToBeConsumed = Collections.synchronizedSet(new HashSet<>());
 	private Set<String> mTokensToBeAcknowledged = Collections.synchronizedSet(new HashSet<>());
-
-	public static String BASE_64_ENCODED_PUBLIC_KEY = "";
 
 	public interface BillingUpdatesListener
 	{
@@ -29,10 +28,11 @@ public class BillingManager implements PurchasesUpdatedListener
 		void onError(String errorMessage);
 	}
 
-	public BillingManager(Activity activity, final BillingUpdatesListener updatesListener)
+	public BillingManager(Activity activity, final BillingUpdatesListener updatesListener, final String publicKey)
 	{
 		mActivity = activity;
 		mBillingUpdatesListener = updatesListener;
+		mBase64EncodedPublicKey = publicKey;
 
 		try
 		{
@@ -291,7 +291,7 @@ public class BillingManager implements PurchasesUpdatedListener
 	{
 		try
 		{
-			return Security.verifyPurchase(BASE_64_ENCODED_PUBLIC_KEY, signedData, signature);
+			return Security.verifyPurchase(mBase64EncodedPublicKey, signedData, signature);
 		}
 		catch (Exception e)
 		{
