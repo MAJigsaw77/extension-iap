@@ -22,7 +22,7 @@ public class BillingManager
 	public interface BillingUpdatesListener
 	{
 		void onBillingClientSetup(Boolean success);
-		void onBillingClientDebugLog(String errorMessage);
+		void onBillingClientDebugLog(String message);
 
 		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
 		void onQuerySubsPurchases(List<Purchase> subscriptionPurchases);

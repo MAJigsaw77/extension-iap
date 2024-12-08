@@ -78,9 +78,9 @@ class IAPAndroid
 
 	/**
 	 * Event dispatched when an error occurs during IAP processing.
-	 * @param errorMessage A string representing the error message.
+	 * @param message A string representing the error message.
 	 */
-	public static var onError(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
 
 	// Flag to indicate if the IAP system has been initialized.
 	@:noCompletion
@@ -380,9 +380,9 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onError(errorMessage:String):Void
+	public function onDebugLog(message:String):Void
 	{
-		IAPAndroid.onError.dispatch(errorMessage);
+		IAPAndroid.onDebugLog.dispatch(message);
 	}
 }
 #end

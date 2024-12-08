@@ -20,12 +20,12 @@ class Main extends lime.app.Application
 			#end
 		});
 
-		iap.IAP.onError.add(function(errorMessage:String):Void
+		iap.IAP.onDebugLog.add(function(message:String):Void
 		{
 			#if android
-			android.widget.Toast.makeText(errorMessage, android.widget.Toast.LENGTH_SHORT);
+			android.widget.Toast.makeText(message, android.widget.Toast.LENGTH_SHORT);
 			#else
-			lime.utils.Log.info(errorMessage);
+			lime.utils.Log.info(message);
 			#end
 		});
 
