@@ -91,7 +91,7 @@ public class BillingManager
 						}
 					}
 					else
-						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
+						mBillingUpdatesListener.onBillingClientDebugLog(result.getDebugMessage());
 				}
 			}).build();
 
@@ -220,7 +220,7 @@ public class BillingManager
 					subsProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.SUBS).build());
 
 				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build(), (billingResult, productDetailsList) -> {
-					mBillingUpdatesListener.onQuerySubsDetails(productDetailsList, billingResult);
+					mBillingUpdatesListener.onQuerySubsProductDetails(productDetailsList, billingResult);
 
 					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 					{
