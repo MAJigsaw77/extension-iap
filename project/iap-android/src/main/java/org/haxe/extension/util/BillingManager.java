@@ -9,7 +9,9 @@ public class BillingManager
 	private final Activity mActivity;
 	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final String mBase64EncodedPublicKey;
+
 	private final List<Purchase> mPurchases = Collections.synchronizedList(new ArrayList<>());
+
 	private final Map<String, ProductDetails> mInAppProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 	private final Map<String, ProductDetails> mSubscriptionProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 
@@ -75,7 +77,8 @@ public class BillingManager
 				public void onBillingServiceDisconnected()
 				{
 					mIsServiceConnected = false;
-					mBillingUpdatesListener.onBillingClientSetupFinished(false);
+
+					mBillingUpdatesListener.onBillingClientSetupFinished(mIsServiceConnected);
 				}
 			});
 		}
@@ -319,28 +322,23 @@ public class BillingManager
 
 	private void handlePurchase(Purchase purchase)
 	{
-		if (!verifyValidSignature(purchase.getOriginalJson(), purchase.getSignature()))
+		try
 		{
-			mBillingUpdatesListener.onError("Invalid purchase signature.");
+			if (!Security.verifyPurchase(mBase64EncodedPublicKey, purchase.getOriginalJson(), purchase.getSignature()))
+			{
+				mBillingUpdatesListener.onError("Invalid purchase signature.");
+				return;
+			}
+		}
+		catch (Exception e)
+		{
+			mBillingUpdatesListener.onError("Failed to verify purchase signature: " + e.getMessage());
 			return;
 		}
 
 		synchronized (mPurchases)
 		{
 			mPurchases.add(purchase);
-		}
-	}
-
-	private boolean verifyValidSignature(String signedData, String signature)
-	{
-		try
-		{
-			return Security.verifyPurchase(mBase64EncodedPublicKey, signedData, signature);
-		}
-		catch (Exception e)
-		{
-			mBillingUpdatesListener.onError("Failed to verify purchase signature: " + e.getMessage());
-			return false;
 		}
 	}
 }
