@@ -132,6 +132,8 @@ class Main extends lime.app.Application
 
 		// iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
 		// iap.IAP.querySubsProductDetailsAsync(['testsubs']);
+		#elseif ios
+		iap.IAP.init();
 		#end
 	}
 
