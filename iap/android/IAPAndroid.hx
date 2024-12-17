@@ -2,8 +2,8 @@ package iap.android;
 
 #if android
 import iap.android.util.JNICache;
-import iap.IAPProductDetails;
-import iap.IAPPurchase;
+import iap.android.IAPProductDetails;
+import iap.android.IAPPurchase;
 import lime.app.Event;
 import lime.utils.Log;
 

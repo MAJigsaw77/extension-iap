@@ -1,4 +1,4 @@
-package iap;
+package iap.android;
 
 import iap.IAPPricingPhase;
 

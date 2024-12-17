@@ -8,6 +8,7 @@ class Main extends lime.app.Application
 	{
 		super();
 
+		#if android
 		iap.IAP.onSetup.add(function(success:Bool):Void
 		{
 			if (success)
@@ -22,7 +23,6 @@ class Main extends lime.app.Application
 			lime.utils.Log.info(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!');
 			#end
 		});
-
 		iap.IAP.onDebugLog.add(function(message:String):Void
 		{
 			#if android
@@ -31,7 +31,6 @@ class Main extends lime.app.Application
 			lime.utils.Log.info(message);
 			#end
 		});
-
 		iap.IAP.onQueryInAppPurchases.add(function(purchases:Array<iap.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
@@ -54,7 +53,6 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-
 		iap.IAP.onQuerySubsPurchases.add(function(purchases:Array<iap.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
@@ -77,7 +75,6 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-
 		iap.IAP.onQueryInAppProductDetails.add(function(products:Array<iap.IAPProductDetails>):Void
 		{
 			if (products != null && products.length > 0)
@@ -100,7 +97,6 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-
 		iap.IAP.onQuerySubsProductDetails.add(function(products:Array<iap.IAPProductDetails>):Void
 		{
 			if (products != null && products.length > 0)
@@ -123,17 +119,20 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
+		#end
 	}
 
 	public override function onWindowCreate():Void
 	{
+		#if android
 		iap.IAP.init(PUBLIC_KEY);
 
-		//iap.IAP.queryInAppPurchasesAsync();
-		//iap.IAP.querySubsPurchasesAsync();
+		// iap.IAP.queryInAppPurchasesAsync();
+		// iap.IAP.querySubsPurchasesAsync();
 
 		// iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
 		// iap.IAP.querySubsProductDetailsAsync(['testsubs']);
+		#end
 	}
 
 	public override function render(context:lime.graphics.RenderContext):Void

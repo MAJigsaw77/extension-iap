@@ -1,6 +1,6 @@
-package iap;
+package iap.android;
 
-import iap.IAPSubscriptionOffer;
+import iap.android.IAPSubscriptionOffer;
 
 class IAPProductDetails
 {
