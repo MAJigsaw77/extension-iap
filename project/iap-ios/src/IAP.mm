@@ -1,9 +1,9 @@
-#import "IAPManager.hpp"
+#import "IAP.hpp"
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
 
-@interface IAPManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
+@interface IAP : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 
 @property (nonatomic, strong) NSArray<SKProduct *> *availableProducts;
 
@@ -12,11 +12,11 @@
 
 @end
 
-@implementation IAPManager
+@implementation IAP
 
 + (instancetype)sharedInstance
 {
-	static IAPManager *sharedInstance = nil;
+	static IAP *sharedInstance = nil;
 
 	static dispatch_once_t onceToken;
 
@@ -96,5 +96,5 @@
 
 void IAP_Init()
 {
-	[[IAPManager sharedInstance] initIAP];
+	[[IAP sharedInstance] initIAP];
 }
