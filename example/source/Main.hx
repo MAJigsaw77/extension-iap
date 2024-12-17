@@ -31,7 +31,7 @@ class Main extends lime.app.Application
 			lime.utils.Log.info(message);
 			#end
 		});
-		iap.IAP.onQueryInAppPurchases.add(function(purchases:Array<iap.IAPPurchase>):Void
+		iap.IAP.onQueryInAppPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
 			{
@@ -53,7 +53,7 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-		iap.IAP.onQuerySubsPurchases.add(function(purchases:Array<iap.IAPPurchase>):Void
+		iap.IAP.onQuerySubsPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
 			{
@@ -75,7 +75,7 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-		iap.IAP.onQueryInAppProductDetails.add(function(products:Array<iap.IAPProductDetails>):Void
+		iap.IAP.onQueryInAppProductDetails.add(function(products:Array<iap.android.IAPProductDetails>):Void
 		{
 			if (products != null && products.length > 0)
 			{
@@ -97,7 +97,7 @@ class Main extends lime.app.Application
 				#end
 			}
 		});
-		iap.IAP.onQuerySubsProductDetails.add(function(products:Array<iap.IAPProductDetails>):Void
+		iap.IAP.onQuerySubsProductDetails.add(function(products:Array<iap.android.IAPProductDetails>):Void
 		{
 			if (products != null && products.length > 0)
 			{
