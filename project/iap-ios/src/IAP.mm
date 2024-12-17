@@ -94,7 +94,7 @@
 
 @end
 
-void IAP_Init()
+void initIAP()
 {
 	[[IAP sharedInstance] initIAP];
 }
