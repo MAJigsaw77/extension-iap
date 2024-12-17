@@ -1,6 +1,6 @@
 package iap.android;
 
-import iap.IAPPricingPhase;
+import iap.android.IAPPricingPhase;
 
 class IAPSubscriptionOffer
 {
