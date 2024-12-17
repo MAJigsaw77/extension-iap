@@ -1,3 +1,3 @@
 #pragma once
 
-void IAP_Init();
+void initIAP();
