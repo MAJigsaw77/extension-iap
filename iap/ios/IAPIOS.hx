@@ -1,6 +1,6 @@
 package iap.ios;
 
-@:buildXml('<include name="${haxelib:extension-admob}/project/admob-ios/Build.xml" />')
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
 @:headerInclude('IAP.hpp')
 class IAPIOS
 {
