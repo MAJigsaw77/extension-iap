@@ -32,9 +32,6 @@
 	NSLog(@"Initializing In-App Purchases...");
 
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-
-	NSArray<NSString *> *productIdentifiers = @[@"com.example.app.product1", @"com.example.app.product2"];
-	[self fetchProducts:productIdentifiers];
 }
 
 - (void)fetchProducts:(NSArray<NSString *> *)productIdentifiers
@@ -50,17 +47,13 @@
 {
 	NSLog(@"Received product response");
 
-	self.availableProducts = response.products; // Store available products
+	self.availableProducts = response.products;
 
 	for (SKProduct *product in self.availableProducts)
-	{
 		NSLog(@"Product found: %@ - %@", product.localizedTitle, product.price);
-	}
 
 	if (response.invalidProductIdentifiers.count > 0)
-	{
 		NSLog(@"Invalid product identifiers: %@", response.invalidProductIdentifiers);
-	}
 }
 
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions
@@ -97,4 +90,25 @@
 void initIAP()
 {
 	[[IAP sharedInstance] initIAP];
+}
+
+void fetchProductsIAP(const char** productIdentifiers, size_t count)
+{
+	if (count == 0 || productIdentifiers == nullptr)
+	{
+		NSLog(@"No product identifiers provided.");
+		return;
+	}
+
+	NSMutableArray<NSString *> *objcProductIdentifiers = [NSMutableArray array];
+
+	for (size_t i = 0; i < count; ++i)
+	{
+		if (productIdentifiers[i] != nullptr)
+			[objcProductIdentifiers addObject:[NSString stringWithUTF8String:productIdentifiers[i]]];
+	}
+
+	NSLog(@"Fetching products through fetchProductsIAP...");
+
+	[[IAP sharedInstance] fetchProducts:objcProductIdentifiers];
 }
