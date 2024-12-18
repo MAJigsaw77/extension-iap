@@ -7,9 +7,6 @@ class IAPIOS
 	@:noCompletion
 	private static var initialized:Bool = false;
 
-	/**
-	 * Initializes the IAP extension.
-	 */
 	public static function init():Void
 	{
 		if (initialized)
