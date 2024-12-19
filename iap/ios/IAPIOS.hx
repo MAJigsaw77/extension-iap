@@ -1,9 +1,20 @@
 package iap.ios;
 
-@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
+import iap.ios.IAPProductDetails;
+import iap.ios.IAPPurchase;
+import lime.app.Event;
+import lime.utils.Log;
+
+@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
 @:headerInclude('IAP.hpp')
 class IAPIOS
 {
+	public static var onSetup(default, null):Event<Bool->Void> = new Event<Bool->Void>();
+	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
+	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+	public static var onPurchaseCompleted(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+	public static var onRestoreCompleted(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
+
 	@:noCompletion
 	private static var initialized:Bool = false;
 
@@ -12,7 +23,13 @@ class IAPIOS
 		if (initialized)
 			return;
 
-		initIAP(new IAPCallbacks());
+		final callbacks:IAPCallbacks = new IAPCallbacks();
+		callbacks.onBillingClientSetup = cpp.Callable.fromStaticFunction(onSetupCallback);
+		callbacks.onBillingClientDebugLog = cpp.Callable.fromStaticFunction(onDebugLogCallback);
+		callbacks.onQueryProductDetails = cpp.Callable.fromStaticFunction(onQueryProductDetailsCallback);
+		callbacks.onPurchaseCompleted = cpp.Callable.fromStaticFunction(onPurchaseCompletedCallback);
+		callbacks.onRestoreCompleted = cpp.Callable.fromStaticFunction(onRestoreCompletedCallback);
+		initIAP(callbacks);
 
 		initialized = true;
 	}
@@ -32,6 +49,56 @@ class IAPIOS
 		untyped __cpp__('delete[] {0}', rawProductsArray);
 	}
 
+	@:noCompletion
+	private static function onSetupCallback(status:Bool):Void
+	{
+		IAPIOS.onSetup.dispatch(status);
+	}
+
+	@:noCompletion
+	private static function onDebugLogCallback(message:cpp.ConstCharStar):Void
+	{
+		IAPIOS.onDebugLog.dispatch(message);
+	}
+
+	@:noCompletion
+	private static function onQueryProductDetailsCallback(data:cpp.ConstCharStar):Void
+	{
+		final parsedProductsDetails:Dynamic = haxe.Json.parse(data);
+
+		if (parsedProductsDetails != null)
+		{
+			final productsDetails:Array<IAPProductDetails> = [];
+
+			for (productDetails in (parsedProductsDetails : Array<Dynamic>))
+				productsDetails.push(new IAPProductDetails(productDetails));
+
+			IAPIOS.onQueryInAppProductDetails.dispatch(productsDetails);
+		}
+	}
+
+	@:noCompletion
+	private static function onPurchaseCompletedCallback(data:cpp.ConstCharStar):Void
+	{
+		IAPIOS.onPurchaseCompleted.dispatch(new IAPPurchase(haxe.Json.parse(data)));
+	}
+
+	@:noCompletion
+	private static function onRestoreCompletedCallback(data:cpp.ConstCharStar):Void
+	{
+		final parsedPurchases:Dynamic = haxe.Json.parse(data);
+
+		if (parsedPurchases != null)
+		{
+			final purchases:Array<IAPPurchase> = [];
+
+			for (purchase in (parsedPurchases : Array<Dynamic>))
+				purchases.push(new IAPPurchase(purchase));
+
+			IAPIOS.onRestoreCompleted.dispatch(purchases);
+		}
+	}
+
 	@:native('initIAP')
 	extern public static function initIAP(callbacks:IAPCallbacks):Void;
 
@@ -45,13 +112,13 @@ class IAPIOS
 	extern public static function restorePurchasesIAP():Void;
 }
 
-@:dox(hide)
-@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
+@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
 @:include('IAP.hpp')
 @:unreflective
 @:structAccess
+@:noCompletion
 @:native('IAPCallbacks')
-extern class IAPCallbacks
+private extern class IAPCallbacks
 {
 	function new():Void;
 
@@ -61,5 +128,3 @@ extern class IAPCallbacks
 	var onPurchaseCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
 	var onRestoreCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
 }
-
-
