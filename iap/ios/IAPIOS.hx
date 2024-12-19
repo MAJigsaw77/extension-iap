@@ -117,6 +117,17 @@ class IAPIOS
 		restorePurchasesIAP();
 	}
 
+	public static function canMakePurchases():Bool
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		return canMakePurchasesIAP();
+	}
+
 	@:noCompletion
 	private static function onSetupCallback(status:Bool):Void
 	{
@@ -178,6 +189,9 @@ class IAPIOS
 
 	@:native('restorePurchasesIAP')
 	extern public static function restorePurchasesIAP():Void;
+
+	@:native('canMakePurchasesIAP')
+	extern public static function canMakePurchasesIAP():Bool;
 }
 
 @:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
