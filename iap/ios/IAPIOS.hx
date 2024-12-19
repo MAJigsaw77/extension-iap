@@ -12,7 +12,7 @@ class IAPIOS
 		if (initialized)
 			return;
 
-		initIAP(new BillingCallbacks());
+		initIAP(new IAPCallbacks());
 
 		initialized = true;
 	}
@@ -33,7 +33,7 @@ class IAPIOS
 	}
 
 	@:native('initIAP')
-	extern public static function initIAP(callbacks:BillingCallbacks):Void;
+	extern public static function initIAP(callbacks:IAPCallbacks):Void;
 
 	@:native('fetchProductsIAP')
 	extern public static function fetchProductsIAP(productIdentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
@@ -50,8 +50,8 @@ class IAPIOS
 @:include('IAP.hpp')
 @:unreflective
 @:structAccess
-@:native('BillingCallbacks')
-extern class BillingCallbacks
+@:native('IAPCallbacks')
+extern class IAPCallbacks
 {
 	function new():Void;
 

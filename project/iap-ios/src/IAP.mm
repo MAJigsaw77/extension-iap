@@ -164,7 +164,7 @@
 
 @interface IAP() <BillingUpdatesListener>
 @property (nonatomic, strong) BillingManager *billingManager;
-@property (nonatomic, assign) BillingCallbacks callbacks;
+@property (nonatomic, assign) IAPCallbacks callbacks;
 @end
 
 @implementation IAP
@@ -192,7 +192,7 @@
 	return self;
 }
 
-- (void)setCallbacks:(BillingCallbacks)callbacks
+- (void)setCallbacks:(IAPCallbacks)callbacks
 {
 	_callbacks = callbacks;
 }
@@ -242,7 +242,7 @@
 }
 @end
 
-void initIAP(BillingCallbacks callbacks)
+void initIAP(IAPCallbacks callbacks)
 {
 	IAP *iap = [IAP sharedInstance];
 	[iap setCallbacks:callbacks];

@@ -6,9 +6,9 @@ typedef struct {
     void (*onQueryProductDetails)(const char** productDetails, size_t count);
     void (*onPurchaseCompleted)(const char* productId);
     void (*onRestoreCompleted)(const char** productIds, size_t count);
-} BillingCallbacks;
+} IAPCallbacks;
 
-void initIAP(BillingCallbacks callbacks);
+void initIAP(IAPCallbacks callbacks);
 void fetchProductsIAP(const char** productIdentifiers, size_t count);
 void purchaseProductIAP(const char* productId);
 void restorePurchasesIAP();
