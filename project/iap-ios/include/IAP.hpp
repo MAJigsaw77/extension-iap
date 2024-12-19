@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 typedef struct {
     void (*onBillingClientSetup)(bool success);
     void (*onBillingClientDebugLog)(const char* message);
