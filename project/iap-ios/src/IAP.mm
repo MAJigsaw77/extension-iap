@@ -9,6 +9,9 @@
 - (void)onQueryProductDetails:(NSArray<SKProduct *> *)productDetails;
 - (void)onPurchaseCompleted:(SKPaymentTransaction *)transaction;
 - (void)onRestoreCompleted:(NSArray<SKPaymentTransaction *> *)transactions;
+- (void)onDownloadInProgress:(SKDownload *)download;
+- (void)onDownloadCompleted:(SKDownload *)download;
+- (void)onDownloadCancelled:(SKDownload *)download;
 @end
 
 @interface BillingManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
@@ -43,9 +46,9 @@
 - (void)startConnection
 {
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+ 	[[SKPaymentQueue defaultQueue] addDownloadObserver:self];
 
 	[self.billingUpdatesListener onBillingClientSetup:YES];
-
 	[self.billingUpdatesListener onBillingClientDebugLog:@"Billing connection started."];
 }
 
@@ -116,21 +119,39 @@
 		{
 			case SKPaymentTransactionStatePurchased:
 				[self.billingUpdatesListener onPurchaseCompleted:transaction];
-
 				[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-
-				break;
+				break;			   
 			case SKPaymentTransactionStateRestored:
 				[self.billingUpdatesListener onRestoreCompleted:queue.transactions];
-
 				[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-
-				break;
+				break;			
 			case SKPaymentTransactionStateFailed:
 				[self.billingUpdatesListener onBillingClientDebugLog:[NSString stringWithFormat:@"Purchase failed: %@", transaction.error.localizedDescription]];
-
 				[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+				break;
+			default:
+				break;
+		}
+	}
+}
 
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedDownloads:(NSArray<SKDownload *> *)downloads
+{
+	for (SKDownload *download in downloads)
+	{
+		switch (download.downloadState)
+		{
+			case SKDownloadStateActive:
+				[self.billingUpdatesListener onDownloadInProgress:download];
+		break;
+			case SKDownloadStateFinished:
+				[self.billingUpdatesListener onDownloadCompleted:download];
+				break;
+			case SKDownloadStateFailed:
+				[self.billingUpdatesListener onBillingClientDebugLog:[NSString stringWithFormat:@"Download failed: %@", download.error.localizedDescription]];
+				break;
+			case SKDownloadStateCancelled:
+				[self.billingUpdatesListener onDownloadCancelled:download];
 				break;
 			default:
 				break;
@@ -229,7 +250,6 @@
 			[productsArray addObject:[self jsonForProduct:product]];
 
 		NSError *error = nil;
-
 		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:productsArray options:0 error:&error];
 
 		if (!error)
@@ -254,7 +274,6 @@
 		NSDictionary *transactionJSON = [self jsonForTransaction:transaction];
 
 		NSError *error = nil;
-
 		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:transactionJSON options:0 error:&error];
 
 		if (!error)
@@ -272,11 +291,67 @@
 			[transactionsArray addObject:[self jsonForTransaction:transaction]];
 
 		NSError *error = nil;
-
 		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:transactionsArray options:0 error:&error];
 
 		if (!error)
 			self.callbacks.onRestoreCompleted([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
+	}
+}
+
+- (void)onDownloadInProgress:(SKDownload *)download
+{
+	if (self.callbacks.onDownloadInProgress)
+	{
+		NSDictionary *downloadJSON = @{
+			@"downloadId": download.downloadIdentifier ?: @"",
+			@"contentIdentifier": download.contentIdentifier ?: @"",
+			@"contentURL": download.contentURL.absoluteString ?: @"",
+			@"progress": @(download.progress.fractionCompleted),
+		};
+
+		NSError *error = nil;
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:downloadJSON options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onDownloadInProgress([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
+	}
+}
+
+- (void)onDownloadCompleted:(SKDownload *)download
+{
+	if (self.callbacks.onDownloadCompleted)
+	{
+		NSDictionary *downloadJSON = @{
+			@"downloadId": download.downloadIdentifier ?: @"",
+			@"contentIdentifier": download.contentIdentifier ?: @"",
+			@"contentURL": download.contentURL.absoluteString ?: @"",
+			@"progress": @(download.progress.fractionCompleted),
+		};
+
+		NSError *error = nil;
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:downloadJSON options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onDownloadCompleted([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
+	}
+}
+
+- (void)onDownloadCancelled:(SKDownload *)download
+{
+	if (self.callbacks.onDownloadCancelled)
+	{
+		NSDictionary *downloadJSON = @{
+			@"downloadId": download.downloadIdentifier ?: @"",
+			@"contentIdentifier": download.contentIdentifier ?: @"",
+			@"contentURL": download.contentURL.absoluteString ?: @"",
+			@"progress": @(download.progress.fractionCompleted),
+		};
+
+		NSError *error = nil;
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:downloadJSON options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onDownloadCancelled([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
 	}
 }
 @end
