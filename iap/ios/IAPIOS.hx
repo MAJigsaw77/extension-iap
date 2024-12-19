@@ -12,7 +12,7 @@ class IAPIOS
 		if (initialized)
 			return;
 
-		initIAP();
+		initIAP(new BillingCallbacks());
 
 		initialized = true;
 	}
