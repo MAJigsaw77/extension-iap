@@ -263,12 +263,28 @@
 {
 	if (self.callbacks.onPurchaseCompleted)
 	{
-		NSDictionary *transactionJSON = @{
-			@"transactionId": transaction.transactionIdentifier ?: @"",
-			@"productIdentifier": transaction.payment.productIdentifier ?: @"",
-			@"transactionDate": transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0),
-			@"transactionState": @(transaction.transactionState)
-		};
+		NSMutableDictionary *transactionJSON = [NSMutableDictionary dictionary];
+		transactionJSON[@"transactionId"] = transaction.transactionIdentifier ?: @"";
+		transactionJSON[@"productIdentifier"] = transaction.payment.productIdentifier ?: @"";
+		transactionJSON[@"transactionDate"] = transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0);
+		transactionJSON[@"transactionState"] = @(transaction.transactionState);
+
+		if (transaction.downloads.count > 0)
+		{
+			NSMutableArray *downloadsArray = [NSMutableArray array];
+
+			for (SKDownload *download in transaction.downloads)
+			{
+				[downloadsArray addObject:@{
+					@"contentIdentifier": download.contentIdentifier ?: @"",
+					@"contentURL": download.contentURL.absoluteString ?: @"",
+					@"progress": @(download.progress),
+					@"downloadState": @(download.downloadState)
+				}];
+			}
+
+			transactionJSON[@"downloads"] = downloadsArray;
+		}
 
 		NSError *error = nil;
 		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:transactionJSON options:0 error:&error];
@@ -286,12 +302,30 @@
 
 		for (SKPaymentTransaction *transaction in transactions)
 		{
-			[transactionsArray addObject:@{
-				@"transactionId": transaction.transactionIdentifier ?: @"",
-				@"productIdentifier": transaction.payment.productIdentifier ?: @"",
-				@"transactionDate": transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0),
-				@"transactionState": @(transaction.transactionState)
-			}];
+			NSMutableDictionary *transactionDict = [NSMutableDictionary dictionary];
+			transactionDict[@"transactionId"] = transaction.transactionIdentifier ?: @"";
+			transactionDict[@"productIdentifier"] = transaction.payment.productIdentifier ?: @"";
+			transactionDict[@"transactionDate"] = transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0);
+			transactionDict[@"transactionState"] = @(transaction.transactionState);
+
+			if (transaction.downloads.count > 0)
+			{
+				NSMutableArray *downloadsArray = [NSMutableArray array];
+
+				for (SKDownload *download in transaction.downloads)
+				{
+					[downloadsArray addObject:@{
+						@"contentIdentifier": download.contentIdentifier ?: @"",
+						@"contentURL": download.contentURL.absoluteString ?: @"",
+						@"progress": @(download.progress),
+						@"downloadState": @(download.downloadState)
+					}];
+				}
+
+				transactionDict[@"downloads"] = downloadsArray;
+			}
+
+			[transactionsArray addObject:transactionDict];
 		}
 
 		NSError *error = nil;
