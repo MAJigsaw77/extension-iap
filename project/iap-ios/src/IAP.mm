@@ -1,4 +1,4 @@
-#import "IAP.hpp"
+#include "IAP.hpp"
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
@@ -70,6 +70,7 @@
 	if (!product)
 	{
 		[self.billingUpdatesListener onBillingClientDebugLog:[NSString stringWithFormat:@"Product not found: %@", productIdentifier]];
+
 		return;
 	}
 
@@ -99,9 +100,7 @@
 		[self.billingUpdatesListener onQueryProductDetails:response.products];
 	}
 	else
-	{
 		[self.billingUpdatesListener onBillingClientDebugLog:@"No products found."];
-	}
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
@@ -114,7 +113,7 @@
 	for (SKPaymentTransaction *transaction in transactions)
 	{
 		switch (transaction.transactionState)
-	{
+		{
 			case SKPaymentTransactionStatePurchased:
 				[self.billingUpdatesListener onPurchaseCompleted:transaction];
 
@@ -213,12 +212,14 @@
 {
 	if (self.callbacks.onQueryProductDetails)
 	{
-		NSMutableArray<const char*> *productDetailsArray = [NSMutableArray arrayWithCapacity:productDetails.count];
-  
-		for (SKProduct *product in productDetails)
-			[productDetailsArray addObject:[product.productIdentifier UTF8String]];
+		const char **productDetailsCArray = (const char **)malloc(productDetails.count * sizeof(const char *));
 
-		self.callbacks.onQueryProductDetails(productDetailsArray.mutableBytes, productDetails.count);
+		for (NSUInteger i = 0; i < productDetails.count; ++i)
+			productDetailsCArray[i] = [productDetails[i].productIdentifier UTF8String];
+
+		self.callbacks.onQueryProductDetails(productDetailsCArray, productDetails.count);
+
+		free(productDetailsCArray);
 	}
 }
 
@@ -232,12 +233,14 @@
 {
 	if (self.callbacks.onRestoreCompleted)
 	{
-		NSMutableArray<const char*> *restoredProducts = [NSMutableArray arrayWithCapacity:transactions.count];
+		const char **restoredProductsCArray = (const char **)malloc(transactions.count * sizeof(const char *));
 
-		for (SKPaymentTransaction *transaction in transactions)
-			[restoredProducts addObject:[transaction.payment.productIdentifier UTF8String]];
+		for (NSUInteger i = 0; i < transactions.count; ++i)
+			restoredProductsCArray[i] = [transactions[i].payment.productIdentifier UTF8String];
 
-		self.callbacks.onRestoreCompleted(restoredProducts.mutableBytes, transactions.count);
+		self.callbacks.onRestoreCompleted(restoredProductsCArray, transactions.count);
+
+		free(restoredProductsCArray);
 	}
 }
 @end
