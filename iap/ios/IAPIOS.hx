@@ -1,6 +1,6 @@
 package iap.ios;
 
-@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
 @:headerInclude('IAP.hpp')
 class IAPIOS
 {
@@ -46,7 +46,7 @@ class IAPIOS
 }
 
 @:dox(hide)
-@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
 @:include('IAP.hpp')
 @:unreflective
 @:structAccess
