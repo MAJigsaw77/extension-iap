@@ -162,7 +162,7 @@
 
 @end
 
-@interface IAP() <BillingUpdatesListener>
+@interface IAP : NSObject <BillingUpdatesListener>
 @property (nonatomic, strong) BillingManager *billingManager;
 @property (nonatomic, assign) IAPCallbacks callbacks;
 @end
