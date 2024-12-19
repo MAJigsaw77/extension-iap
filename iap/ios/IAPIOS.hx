@@ -34,19 +34,44 @@ class IAPIOS
 		initialized = true;
 	}
 
-	public static function queryProductDetails(productIdentifiers:Array<String>):Void
+	public static function queryProductDetails(ids:Array<String>):Void
 	{
 		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
 			return;
+		}
 
 		final rawProductsArray:cpp.RawPointer<cpp.ConstCharStar> = untyped __cpp__('new const char *[{0}]', productIdentifiers.length);
 
-		for (i in 0...productIdentifiers.length)
-			rawProductsArray[i] = cpp.ConstCharStar.fromString(productIdentifiers[i]);
+		for (i in 0...ids.length)
+			rawProductsArray[i] = cpp.ConstCharStar.fromString(ids[i]);
 
-		queryProductDetailsIAP(rawProductsArray, productIdentifiers.length);
+		queryProductDetailsIAP(rawProductsArray, ids.length);
 
 		untyped __cpp__('delete[] {0}', rawProductsArray);
+	}
+
+	public static function purchaseProduct(productDetails:IAPProductDetails):Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		purchaseProductIAP(productDetails.productIdentifier);
+	}
+
+	public static function restorePurchases():Void
+	{
+		if (!initialized)
+		{
+			Log.warn('IAP not initialized.');
+			return;
+		}
+
+		restorePurchasesIAP();
 	}
 
 	@:noCompletion
