@@ -74,9 +74,7 @@
 		return;
 	}
 
-	SKPayment *payment = [SKPayment paymentWithProduct:product];
-
-	[[SKPaymentQueue defaultQueue] addPayment:payment];
+	[[SKPaymentQueue defaultQueue] addPayment:[SKPayment paymentWithProduct:product]];
 }
 
 - (void)restorePurchases
