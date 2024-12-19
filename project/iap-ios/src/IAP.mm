@@ -259,15 +259,15 @@ void fetchProductsIAP(const char** productIdentifiers, size_t count)
 	for (size_t i = 0; i < count; ++i)
 		[objcProductIdentifiers addObject:[NSString stringWithUTF8String:productIdentifiers[i]]];
 
-	[[IAP sharedInstance] fetchProducts:objcProductIdentifiers];
+	[[[IAP sharedInstance] billingManager] queryProductDetails:objcProductIdentifiers];
 }
 
 void purchaseProductIAP(const char* productId)
 {
-	[[IAP sharedInstance] purchaseProduct:[NSString stringWithUTF8String:productId]];
+	[[[IAP sharedInstance] billingManager] initiatePurchaseFlow:[NSString stringWithUTF8String:productId]];
 }
 
 void restorePurchasesIAP()
 {
-	[[IAP sharedInstance] restorePurchases];
+	[[[IAP sharedInstance] billingManager] restorePurchases];
 }
