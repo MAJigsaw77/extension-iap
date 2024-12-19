@@ -57,7 +57,9 @@ extern class IAPCallbacks
 
 	var onBillingClientSetup:cpp.Callable<(success:Bool) -> Void>;
 	var onBillingClientDebugLog:cpp.Callable<(message:cpp.ConstCharStar) -> Void>;
-	var onQueryProductDetails:cpp.Callable<(productDetails:cpp.RawPointer<cpp.ConstCharStar>, count:Int) -> Void>;
-	var onPurchaseCompleted:cpp.Callable<(productId:cpp.ConstCharStar) -> Void>;
-	var onRestoreCompleted:cpp.Callable<(productIds:cpp.RawPointer<cpp.ConstCharStar>, count:Int) -> Void>;
+	var onQueryProductDetails:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
+	var onPurchaseCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
+	var onRestoreCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
 }
+
+
