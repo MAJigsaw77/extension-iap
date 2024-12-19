@@ -208,39 +208,75 @@
 		self.callbacks.onBillingClientDebugLog([message UTF8String]);
 }
 
+- (NSDictionary *)jsonForProduct:(SKProduct *)product
+{
+	return @{
+		@"productIdentifier": product.productIdentifier ?: @"",
+		@"localizedTitle": product.localizedTitle ?: @"",
+		@"localizedDescription": product.localizedDescription ?: @"",
+		@"price": product.price.stringValue ?: @"0.00",
+		@"priceLocale": product.priceLocale.localeIdentifier ?: @""
+	};
+}
+
 - (void)onQueryProductDetails:(NSArray<SKProduct *> *)productDetails
 {
 	if (self.callbacks.onQueryProductDetails)
 	{
-		const char **productDetailsCArray = new const char *[productDetails.count];
+		NSMutableArray *productsArray = [NSMutableArray array];
 
-		for (NSUInteger i = 0; i < productDetails.count; ++i)
-			productDetailsCArray[i] = [productDetails[i].productIdentifier UTF8String];
+		for (SKProduct *product in productDetails)
+			[productsArray addObject:[self jsonForProduct:product]];
 
-		self.callbacks.onQueryProductDetails(productDetailsCArray, productDetails.count);
+		NSError *error = nil;
 
-		delete[] productDetailsCArray;
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:productsArray options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onQueryProductDetails([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
 	}
+}
+
+- (NSDictionary *)jsonForTransaction:(SKPaymentTransaction *)transaction
+{
+	return @{
+		@"transactionId": transaction.transactionIdentifier ?: @"",
+		@"productIdentifier": transaction.payment.productIdentifier ?: @"",
+		@"transactionDate": transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0),
+		@"transactionState": @(transaction.transactionState)
+	};
 }
 
 - (void)onPurchaseCompleted:(SKPaymentTransaction *)transaction
 {
 	if (self.callbacks.onPurchaseCompleted)
-		self.callbacks.onPurchaseCompleted([transaction.payment.productIdentifier UTF8String]);
+	{
+		NSDictionary *transactionJSON = [self jsonForTransaction:transaction];
+
+		NSError *error = nil;
+
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:transactionJSON options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onPurchaseCompleted([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
+	}
 }
 
 - (void)onRestoreCompleted:(NSArray<SKPaymentTransaction *> *)transactions
 {
 	if (self.callbacks.onRestoreCompleted)
 	{
-		const char **restoredProductsCArray = new const char *[transactions.count];
+		NSMutableArray *transactionsArray = [NSMutableArray array];
 
-		for (NSUInteger i = 0; i < transactions.count; ++i)
-			restoredProductsCArray[i] = [transactions[i].payment.productIdentifier UTF8String];
+		for (SKPaymentTransaction *transaction in transactions)
+			[transactionsArray addObject:[self jsonForTransaction:transaction]];
 
-		self.callbacks.onRestoreCompleted(restoredProductsCArray, transactions.count);
+		NSError *error = nil;
 
-		delete[] restoredProductsCArray;
+		NSData *jsonData = [NSJSONSerialization dataWithJSONObject:transactionsArray options:0 error:&error];
+
+		if (!error)
+			self.callbacks.onRestoreCompleted([[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] UTF8String]);
 	}
 }
 @end
