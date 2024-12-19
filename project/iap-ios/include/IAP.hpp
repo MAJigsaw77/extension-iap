@@ -11,6 +11,6 @@ typedef struct {
 } IAPCallbacks;
 
 void initIAP(IAPCallbacks callbacks);
-void fetchProductsIAP(const char** productIdentifiers, size_t count);
+void queryProductDetailsIAP(const char** productIdentifiers, size_t count);
 void purchaseProductIAP(const char* productId);
 void restorePurchasesIAP();

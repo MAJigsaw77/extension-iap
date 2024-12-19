@@ -252,7 +252,7 @@ void initIAP(IAPCallbacks callbacks)
 	[[iap billingManager] startConnection];
 }
 
-void fetchProductsIAP(const char** productIdentifiers, size_t count)
+void queryProductDetailsIAP(const char** productIdentifiers, size_t count)
 {
 	NSMutableArray<NSString *> *objcProductIdentifiers = [NSMutableArray array];
 

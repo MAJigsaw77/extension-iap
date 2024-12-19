@@ -17,7 +17,7 @@ class IAPIOS
 		initialized = true;
 	}
 
-	public static function fetchProducts(productIdentifiers:Array<String>):Void
+	public static function queryProductDetails(productIdentifiers:Array<String>):Void
 	{
 		if (!initialized)
 			return;
@@ -27,7 +27,7 @@ class IAPIOS
 		for (i in 0...productIdentifiers.length)
 			rawProductsArray[i] = cpp.ConstCharStar.fromString(productIdentifiers[i]);
 
-		fetchProductsIAP(rawProductsArray, productIdentifiers.length);
+		queryProductDetailsIAP(rawProductsArray, productIdentifiers.length);
 
 		untyped __cpp__('delete[] {0}', rawProductsArray);
 	}
@@ -35,8 +35,8 @@ class IAPIOS
 	@:native('initIAP')
 	extern public static function initIAP(callbacks:IAPCallbacks):Void;
 
-	@:native('fetchProductsIAP')
-	extern public static function fetchProductsIAP(productIdentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
+	@:native('queryProductDetailsIAP')
+	extern public static function queryProductDetailsIAP(productIdentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
 
 	@:native('purchaseProductIAP')
 	extern public static function purchaseProductIAP(productId:cpp.ConstCharStar):Void;
