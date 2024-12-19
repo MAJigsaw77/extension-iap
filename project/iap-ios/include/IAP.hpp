@@ -8,6 +8,9 @@ typedef struct {
     void (*onQueryProductDetails)(const char* data);
     void (*onPurchaseCompleted)(const char* data);
     void (*onRestoreCompleted)(const char* data);
+    void (*onDownloadInProgress)(const char* data);
+    void (*onDownloadCompleted)(const char* data);
+    void (*onDownloadCancelled)(const char* data);
 } IAPCallbacks;
 
 void initIAP(IAPCallbacks callbacks);
