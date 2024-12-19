@@ -8,7 +8,7 @@ typedef struct {
     void (*onRestoreCompleted)(const char* productIds[], size_t count);
 } BillingCallbacks;
 
-void initIAP(BillingCallbacks callbacks)
-void fetchProductsIAP(const char** productIdentifiers, size_t count)
-void purchaseProductIAP(const char* productId)
-void restorePurchasesIAP()
+void initIAP(BillingCallbacks callbacks);
+void fetchProductsIAP(const char** productIdentifiers, size_t count);
+void purchaseProductIAP(const char* productId);
+void restorePurchasesIAP();
