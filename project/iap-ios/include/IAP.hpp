@@ -5,9 +5,9 @@
 typedef struct {
     void (*onBillingClientSetup)(bool success);
     void (*onBillingClientDebugLog)(const char* message);
-    void (*onQueryProductDetails)(const char** productDetails, size_t count);
-    void (*onPurchaseCompleted)(const char* productId);
-    void (*onRestoreCompleted)(const char** productIds, size_t count);
+    void (*onQueryProductDetails)(const char* data);
+    void (*onPurchaseCompleted)(const char* data);
+    void (*onRestoreCompleted)(const char* data);
 } IAPCallbacks;
 
 void initIAP(IAPCallbacks callbacks);
