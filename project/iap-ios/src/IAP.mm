@@ -212,14 +212,14 @@
 {
 	if (self.callbacks.onQueryProductDetails)
 	{
-		const char **productDetailsCArray = (const char **)malloc(productDetails.count * sizeof(const char *));
+		const char **productDetailsCArray = new const char *[productDetails.count];
 
 		for (NSUInteger i = 0; i < productDetails.count; ++i)
 			productDetailsCArray[i] = [productDetails[i].productIdentifier UTF8String];
 
 		self.callbacks.onQueryProductDetails(productDetailsCArray, productDetails.count);
 
-		free(productDetailsCArray);
+		delete[] productDetailsCArray;
 	}
 }
 
@@ -233,14 +233,14 @@
 {
 	if (self.callbacks.onRestoreCompleted)
 	{
-		const char **restoredProductsCArray = (const char **)malloc(transactions.count * sizeof(const char *));
+		const char **restoredProductsCArray = new const char *[transactions.count];
 
 		for (NSUInteger i = 0; i < transactions.count; ++i)
 			restoredProductsCArray[i] = [transactions[i].payment.productIdentifier UTF8String];
 
 		self.callbacks.onRestoreCompleted(restoredProductsCArray, transactions.count);
 
-		free(restoredProductsCArray);
+		delete[] restoredProductsCArray;
 	}
 }
 @end
