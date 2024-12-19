@@ -14,3 +14,4 @@ void initIAP(IAPCallbacks callbacks);
 void queryProductDetailsIAP(const char** productIdentifiers, size_t count);
 void purchaseProductIAP(const char* productId);
 void restorePurchasesIAP();
+bool canMakePurchasesIAP();
