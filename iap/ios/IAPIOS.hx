@@ -5,19 +5,51 @@ import iap.ios.IAPPurchase;
 import lime.app.Event;
 import lime.utils.Log;
 
-@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
+/**
+ * A class that handles in-app purchase (IAP) functionality on iOS, using native platform integration.
+ * Provides methods for initializing the IAP system, purchasing products, querying product details, and restoring purchases.
+ */
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
 @:headerInclude('IAP.hpp')
 class IAPIOS
 {
+	/**
+	 * Event dispatched on the IAP system initialization setup.
+	 * @param status A boolean indicating the initialization status.
+	 */
 	public static var onSetup(default, null):Event<Bool->Void> = new Event<Bool->Void>();
+
+	/**
+	 * Event dispatched when a debug log occurs during IAP processing.
+	 * @param message A string representing the debug message.
+	 */
 	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
+
+	/**
+	 * Event dispatched when product details have been successfully queried.
+	 * @param result An array of IAPProductDetails objects representing the queried product details.
+	 */
 	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+
+	/**
+	 * Event dispatched when a purchase has been successfully completed.
+	 * @param purchase The IAPPurchase object representing the completed purchase.
+	 */
 	public static var onPurchaseCompleted(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
+
+	/**
+	 * Event dispatched when restoring purchases has been successfully completed.
+	 * @param purchases An array of IAPPurchase objects representing the restored purchases.
+	 */
 	public static var onRestoreCompleted(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
 
+	/**
+	 * Initializes the IAP system with necessary callbacks for event handling.
+	 * This must be called before any other IAP-related methods.
+	 */
 	public static function init():Void
 	{
 		if (initialized)
@@ -34,6 +66,10 @@ class IAPIOS
 		initialized = true;
 	}
 
+	/**
+	 * Queries product details for a list of product IDs.
+	 * @param ids An array of product IDs to query details for.
+	 */
 	public static function queryProductDetails(ids:Array<String>):Void
 	{
 		if (!initialized)
@@ -42,7 +78,7 @@ class IAPIOS
 			return;
 		}
 
-		final rawProductsArray:cpp.RawPointer<cpp.ConstCharStar> = untyped __cpp__('new const char *[{0}]', productIdentifiers.length);
+		final rawProductsArray:cpp.RawPointer<cpp.ConstCharStar> = untyped __cpp__('new const char *[{0}]', ids.length);
 
 		for (i in 0...ids.length)
 			rawProductsArray[i] = cpp.ConstCharStar.fromString(ids[i]);
@@ -52,6 +88,10 @@ class IAPIOS
 		untyped __cpp__('delete[] {0}', rawProductsArray);
 	}
 
+	/**
+	 * Initiates a purchase for a product.
+	 * @param productDetails The IAPProductDetails object representing the product to be purchased.
+	 */
 	public static function purchaseProduct(productDetails:IAPProductDetails):Void
 	{
 		if (!initialized)
@@ -63,6 +103,9 @@ class IAPIOS
 		purchaseProductIAP(productDetails.productIdentifier);
 	}
 
+	/**
+	 * Restores previous purchases that were made by the user.
+	 */
 	public static function restorePurchases():Void
 	{
 		if (!initialized)
@@ -137,7 +180,7 @@ class IAPIOS
 	extern public static function restorePurchasesIAP():Void;
 }
 
-@:buildXml('<include name="${haxelib:extension - iap}/project/iap-ios/Build.xml" />')
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
 @:include('IAP.hpp')
 @:unreflective
 @:structAccess
