@@ -21,6 +21,7 @@
 - (void)queryProductDetails:(NSArray<NSString *> *)productIdentifiers;
 - (void)initiatePurchaseFlow:(NSString *)productIdentifier;
 - (void)restorePurchases;
+- (BOOL)canMakePayments
 - (void)destroy;
 
 @end
@@ -80,6 +81,11 @@
 - (void)restorePurchases
 {
 	[[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
+}
+
+- (BOOL)canMakePayments
+{
+	return [SKPaymentQueue canMakePayments];
 }
 
 - (void)destroy
@@ -206,17 +212,6 @@
 		self.callbacks.onBillingClientDebugLog([message UTF8String]);
 }
 
-- (NSDictionary *)jsonForProduct:(SKProduct *)product
-{
-	return @{
-		@"productIdentifier": product.productIdentifier ?: @"",
-		@"localizedTitle": product.localizedTitle ?: @"",
-		@"localizedDescription": product.localizedDescription ?: @"",
-		@"price": product.price.stringValue ?: @"0.00",
-		@"priceLocale": product.priceLocale.localeIdentifier ?: @""
-	};
-}
-
 - (void)onQueryProductDetails:(NSArray<SKProduct *> *)productDetails
 {
 	if (self.callbacks.onQueryProductDetails)
@@ -224,7 +219,15 @@
 		NSMutableArray *productsArray = [NSMutableArray array];
 
 		for (SKProduct *product in productDetails)
-			[productsArray addObject:[self jsonForProduct:product]];
+		{
+			[productsArray addObject:@{
+				@"productIdentifier": product.productIdentifier ?:@"",
+				@"localizedTitle": product.localizedTitle ?:@"",
+				@"localizedDescription": product.localizedDescription ?:@"",
+				@"price": product.price.stringValue ?:@"0.00",
+				@"priceLocale": product.priceLocale.localeIdentifier ?:@""
+			}];
+		}
 
 		NSError *error = nil;
 
@@ -235,21 +238,16 @@
 	}
 }
 
-- (NSDictionary *)jsonForTransaction:(SKPaymentTransaction *)transaction
-{
-	return @{
-		@"transactionId": transaction.transactionIdentifier ?: @"",
-		@"productIdentifier": transaction.payment.productIdentifier ?: @"",
-		@"transactionDate": transaction.transactionDate ? @([transaction.transactionDate timeIntervalSince1970]) : @(0),
-		@"transactionState": @(transaction.transactionState)
-	};
-}
-
 - (void)onPurchaseCompleted:(SKPaymentTransaction *)transaction
 {
 	if (self.callbacks.onPurchaseCompleted)
 	{
-		NSDictionary *transactionJSON = [self jsonForTransaction:transaction];
+		NSDictionary *transactionJSON =@{
+			@"transactionId": transaction.transactionIdentifier ?:@"",
+			@"productIdentifier": transaction.payment.productIdentifier ?:@"",
+			@"transactionDate": transaction.transactionDate ?@([transaction.transactionDate timeIntervalSince1970]) :@(0),
+			@"transactionState":@(transaction.transactionState)
+		};
 
 		NSError *error = nil;
 
@@ -267,7 +265,14 @@
 		NSMutableArray *transactionsArray = [NSMutableArray array];
 
 		for (SKPaymentTransaction *transaction in transactions)
-			[transactionsArray addObject:[self jsonForTransaction:transaction]];
+		{
+			[transactionsArray addObject:@{
+				@"transactionId": transaction.transactionIdentifier ?:@"",
+				@"productIdentifier": transaction.payment.productIdentifier ?:@"",
+				@"transactionDate": transaction.transactionDate ?@([transaction.transactionDate timeIntervalSince1970]) :@(0),
+				@"transactionState":@(transaction.transactionState)
+			}];
+		}
 
 		NSError *error = nil;
 
@@ -281,9 +286,9 @@
 
 void initIAP(IAPCallbacks callbacks)
 {
-	IAP *iap = [IAP sharedInstance];
-	[iap setCallbacks:callbacks];
-	[[iap billingManager] startConnection];
+	[[IAP sharedInstance] setCallbacks:callbacks];
+
+	[[[IAP sharedInstance] billingManager] startConnection];
 }
 
 void queryProductDetailsIAP(const char** productIdentifiers, size_t count)
@@ -304,4 +309,9 @@ void purchaseProductIAP(const char* productId)
 void restorePurchasesIAP()
 {
 	[[[IAP sharedInstance] billingManager] restorePurchases];
+}
+
+bool canMakePurchasesIAP()
+{
+	[[[IAP sharedInstance] billingManager] canMakePayments];
 }
