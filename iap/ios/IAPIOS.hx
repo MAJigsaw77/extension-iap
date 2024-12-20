@@ -117,6 +117,20 @@ class IAPIOS
 		restorePurchasesIAP();
 	}
 
+	/**
+	 * Checks if the user is allowed to make purchases on the current device.
+	 *
+	 * The value can be `false` under the following conditions:
+	 * - Content & Privacy Restrictions in Screen Time are set to prevent purchases.
+	 *   For more information, see [Use parental controls on your child’s iPhone, iPad, and iPod touch](https://support.apple.com/en-us/HT201304).
+	 * - The device has a mobile device management (MDM) profile that prevents purchases.
+	 *   For more information, see [Device Management](https://support.apple.com/business/).
+	 *
+	 * If the method returns `true` and your app uses only StoreKit In-App Purchase APIs, the user can authorize purchases in the App Store,
+	 * and your app can offer In-App Purchases.
+	 *
+	 * @return A boolean indicating whether purchases are allowed.
+	 */
 	public static function canMakePurchases():Bool
 	{
 		if (!initialized)
@@ -182,10 +196,10 @@ class IAPIOS
 	extern public static function initIAP(callbacks:IAPCallbacks):Void;
 
 	@:native('queryProductDetailsIAP')
-	extern public static function queryProductDetailsIAP(productIdentifierentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
+	extern public static function queryProductDetailsIAP(productIdentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
 
 	@:native('purchaseProductIAP')
-	extern public static function purchaseProductIAP(productId:cpp.ConstCharStar):Void;
+	extern public static function purchaseProductIAP(productIdentifier:cpp.ConstCharStar):Void;
 
 	@:native('restorePurchasesIAP')
 	extern public static function restorePurchasesIAP():Void;
