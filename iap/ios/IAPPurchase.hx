@@ -9,7 +9,7 @@ class IAPPurchase
 
 	public function new(json:Dynamic):Void
 	{
-		transactionIdentifier = json.transactionId;
+		transactionIdentifier = json.transactionIdentifier;
 		productIdentifier = json.productIdentifier;
 		transactionDate = json.transactionDate;
 		transactionState = json.transactionState;
