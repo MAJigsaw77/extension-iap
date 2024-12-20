@@ -43,7 +43,6 @@
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 
 	[self.billingUpdatesListener onBillingClientSetup:YES];
-
 	[self.billingUpdatesListener onBillingClientDebugLog:@"Billing connection started."];
 }
 
@@ -52,7 +51,6 @@
 	if (!productIdentifiers || productIdentifiers.count == 0)
 	{
 		[self.billingUpdatesListener onBillingClientDebugLog:@"No product identifiers provided."];
-
 		return;
 	}
 
@@ -68,7 +66,6 @@
 	if (!product)
 	{
 		[self.billingUpdatesListener onBillingClientDebugLog:[NSString stringWithFormat:@"Product not found: %@", productIdentifier]];
-
 		return;
 	}
 
