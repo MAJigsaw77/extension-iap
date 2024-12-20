@@ -182,7 +182,7 @@ class IAPIOS
 	extern public static function initIAP(callbacks:IAPCallbacks):Void;
 
 	@:native('queryProductDetailsIAP')
-	extern public static function queryProductDetailsIAP(productIdentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
+	extern public static function queryProductDetailsIAP(productIdentifierentifiers:cpp.RawPointer<cpp.ConstCharStar>, count:cpp.SizeT):Void;
 
 	@:native('purchaseProductIAP')
 	extern public static function purchaseProductIAP(productId:cpp.ConstCharStar):Void;

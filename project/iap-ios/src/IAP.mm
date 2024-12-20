@@ -237,7 +237,7 @@
 	if (self.callbacks.onPurchaseCompleted)
 	{
 		NSDictionary *transactionJSON =@{
-			@"transactionId": transaction.transactionIdentifier ?:@"",
+			@"transactionIdentifier": transaction.transactionIdentifier ?:@"",
 			@"productIdentifier": transaction.payment.productIdentifier ?:@"",
 			@"transactionDate": transaction.transactionDate ?@([transaction.transactionDate timeIntervalSince1970]) :@(0),
 			@"transactionState":@(transaction.transactionState)
@@ -261,7 +261,7 @@
 		for (SKPaymentTransaction *transaction in transactions)
 		{
 			[transactionsArray addObject:@{
-				@"transactionId": transaction.transactionIdentifier ?:@"",
+				@"transactionIdentifier": transaction.transactionIdentifier ?:@"",
 				@"productIdentifier": transaction.payment.productIdentifier ?:@"",
 				@"transactionDate": transaction.transactionDate ?@([transaction.transactionDate timeIntervalSince1970]) :@(0),
 				@"transactionState":@(transaction.transactionState)
