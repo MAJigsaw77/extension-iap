@@ -12,10 +12,8 @@
 @end
 
 @interface BillingManager : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
-
 @property (nonatomic, weak) id<BillingUpdatesListener> billingUpdatesListener;
 @property (nonatomic, strong) NSMutableArray<SKProduct *> *availableProducts;
-
 - (instancetype)initWithUpdatesListener:(id<BillingUpdatesListener>)listener;
 - (void)startConnection;
 - (void)queryProductDetails:(NSArray<NSString *> *)productIdentifiers;
@@ -23,7 +21,6 @@
 - (void)restorePurchases;
 - (BOOL)canMakePayments
 - (void)destroy;
-
 @end
 
 @implementation BillingManager
