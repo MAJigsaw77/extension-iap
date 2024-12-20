@@ -8,13 +8,16 @@ class Main extends lime.app.Application
 	{
 		super();
 
-		#if android
 		iap.IAP.onSetup.add(function(success:Bool):Void
 		{
 			if (success)
 			{
+				#if android
 				iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
 				iap.IAP.querySubsProductDetailsAsync(['testsubs']);
+				#else
+				iap.IAP.queryProductDetails(['idk']);
+				#end
 			}
 
 			#if android
@@ -31,6 +34,7 @@ class Main extends lime.app.Application
 			lime.utils.Log.info(message);
 			#end
 		});
+		#if android
 		iap.IAP.onQueryInAppPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
@@ -124,17 +128,7 @@ class Main extends lime.app.Application
 
 	public override function onWindowCreate():Void
 	{
-		#if android
-		iap.IAP.init(PUBLIC_KEY);
-
-		// iap.IAP.queryInAppPurchasesAsync();
-		// iap.IAP.querySubsPurchasesAsync();
-
-		// iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
-		// iap.IAP.querySubsProductDetailsAsync(['testsubs']);
-		#elseif ios
-		iap.IAP.init();
-		#end
+		iap.IAP.init(#if android PUBLIC_KEY #end);
 	}
 
 	public override function render(context:lime.graphics.RenderContext):Void
