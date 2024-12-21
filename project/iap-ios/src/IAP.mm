@@ -19,7 +19,7 @@
 - (void)queryProductDetails:(NSArray<NSString *> *)productIdentifiers;
 - (void)initiatePurchaseFlow:(NSString *)productIdentifier;
 - (void)restorePurchases;
-- (BOOL)canMakePayments
+- (BOOL)canMakePayments;
 - (void)destroy;
 @end
 
