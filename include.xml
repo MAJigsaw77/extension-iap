@@ -10,5 +10,5 @@
 		<config:android extension="org.haxe.extension.IAP" />
 	</section>
 
-	<dependency name="StoreKit.framework" if="mac || ios || tvos" />
+	<dependency name="StoreKit.framework" if="ios || tvos" />
 </extension>
