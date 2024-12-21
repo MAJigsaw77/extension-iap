@@ -136,7 +136,7 @@ class IAPIOS
 		if (!initialized)
 		{
 			Log.warn('IAP not initialized.');
-			return;
+			return false;
 		}
 
 		return canMakePurchasesIAP();
