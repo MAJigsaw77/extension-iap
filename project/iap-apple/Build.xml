@@ -17,6 +17,8 @@
 	</files>
 
 	<target id="haxe">
+		<vflag name="-framework" value="StoreKit" />
+	
 		<files id="iap" />
 	</target>
 </xml>
