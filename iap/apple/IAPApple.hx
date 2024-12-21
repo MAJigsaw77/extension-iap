@@ -1,17 +1,18 @@
-package iap.ios;
+package iap.apple;
 
-import iap.ios.IAPProductDetails;
-import iap.ios.IAPPurchase;
+#if (mac || ios || tvos)
+import iap.apple.IAPProductDetails;
+import iap.apple.IAPPurchase;
 import lime.app.Event;
 import lime.utils.Log;
 
 /**
- * A class that handles in-app purchase (IAP) functionality on iOS, using native platform integration.
+ * A class that handles in-app purchase (IAP) functionality on Apple targets, using StoreKit.
  * Provides methods for initializing the IAP system, purchasing products, querying product details, and restoring purchases.
  */
-@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
-@:headerInclude('IAP.hpp')
-class IAPIOS
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-apple/Build.xml" />')
+@:headerInclude('iap.hpp')
+class IAPApple
 {
 	/**
 	 * Event dispatched on the IAP system initialization setup.
@@ -145,13 +146,13 @@ class IAPIOS
 	@:noCompletion
 	private static function onSetupCallback(status:Bool):Void
 	{
-		IAPIOS.onSetup.dispatch(status);
+		IAPApple.onSetup.dispatch(status);
 	}
 
 	@:noCompletion
 	private static function onDebugLogCallback(message:cpp.ConstCharStar):Void
 	{
-		IAPIOS.onDebugLog.dispatch(message);
+		IAPApple.onDebugLog.dispatch(message);
 	}
 
 	@:noCompletion
@@ -166,14 +167,14 @@ class IAPIOS
 			for (productDetails in (parsedProductsDetails : Array<Dynamic>))
 				productsDetails.push(new IAPProductDetails(productDetails));
 
-			IAPIOS.onQueryInAppProductDetails.dispatch(productsDetails);
+			IAPApple.onQueryInAppProductDetails.dispatch(productsDetails);
 		}
 	}
 
 	@:noCompletion
 	private static function onPurchaseCompletedCallback(data:cpp.ConstCharStar):Void
 	{
-		IAPIOS.onPurchaseCompleted.dispatch(new IAPPurchase(haxe.Json.parse(data)));
+		IAPApple.onPurchaseCompleted.dispatch(new IAPPurchase(haxe.Json.parse(data)));
 	}
 
 	@:noCompletion
@@ -188,7 +189,7 @@ class IAPIOS
 			for (purchase in (parsedPurchases : Array<Dynamic>))
 				purchases.push(new IAPPurchase(purchase));
 
-			IAPIOS.onRestoreCompleted.dispatch(purchases);
+			IAPApple.onRestoreCompleted.dispatch(purchases);
 		}
 	}
 
@@ -208,8 +209,8 @@ class IAPIOS
 	extern public static function canMakePurchasesIAP():Bool;
 }
 
-@:buildXml('<include name="${haxelib:extension-iap}/project/iap-ios/Build.xml" />')
-@:include('IAP.hpp')
+@:buildXml('<include name="${haxelib:extension-iap}/project/iap-apple/Build.xml" />')
+@:include('iap.hpp')
 @:unreflective
 @:structAccess
 @:noCompletion
@@ -224,3 +225,4 @@ private extern class IAPCallbacks
 	var onPurchaseCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
 	var onRestoreCompleted:cpp.Callable<(data:cpp.ConstCharStar) -> Void>;
 }
+#end

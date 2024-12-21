@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+	<pragma once="true" />
+
+	<files id="haxe">
+		<compilerflag value="-I${haxelib:extension-iap}/project/iap-apple/include" />
+	</files>
+
+	<files id="__main__">
+		<compilerflag value="-I${haxelib:extension-iap}/project/iap-apple/include" />
+	</files>
+
+	<files id="iap">
+		<compilerflag value="-I${haxelib:extension-iap}/project/iap-apple/include" />
+
+		<file name="${haxelib:extension-iap}/project/iap-apple/src/iap.mm" />
+	</files>
+
+	<target id="haxe">
+		<files id="iap" />
+	</target>
+</xml>

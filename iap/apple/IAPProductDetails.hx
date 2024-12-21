@@ -1,4 +1,4 @@
-package iap.ios;
+package iap.apple;
 
 class IAPProductDetails
 {

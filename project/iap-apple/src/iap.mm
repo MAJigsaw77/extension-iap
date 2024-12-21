@@ -1,4 +1,4 @@
-#include "IAP.hpp"
+#include "iap.hpp"
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
