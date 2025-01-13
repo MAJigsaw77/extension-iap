@@ -58,22 +58,10 @@ class IAPAndroid
 	public static var onQueryInAppPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	/**
-	 * Event dispatched when purchase details are finished being queried.
-	 * @param purchases An array of IAPPurchase objects representing the queried purchases.
-	 */
-	public static var onQuerySubsPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
-
-	/**
 	 * Event dispatched when product details are finished being queried.
 	 * @param result An array of IAPProductDetails objects representing the queried product details.
 	 */
 	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
-
-	/**
-	 * Event dispatched when product details are finished being queried.
-	 * @param result An array of IAPProductDetails objects representing the queried product details.
-	 */
-	public static var onQuerySubsProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
@@ -113,24 +101,6 @@ class IAPAndroid
 
 		if (purchaseJNI != null)
 			purchaseJNI(productDetails.productId);
-	}
-
-	/**
-	 * Initiates a subscription for a product.
-	 * @param productDetails The IAPProductDetails object representing the product to be subscribed to.
-	 */
-	public static function subscribe(productDetails:IAPProductDetails):Void
-	{
-		if (!initialized)
-		{
-			Log.warn('IAP is not initialized. Subscription cannot proceed.');
-			return;
-		}
-
-		final subscribeJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'subscribe', '(Ljava/lang/String;)V');
-
-		if (subscribeJNI != null)
-			subscribeJNI(productDetails.productId);
 	}
 
 	/**
@@ -190,25 +160,6 @@ class IAPAndroid
 	}
 
 	/**
-	 * Queries subscription product details asynchronously.
-	 * @param ids An array of subscription product IDs to query details for.
-	 */
-	public static function querySubsProductDetailsAsync(ids:Array<String>):Void
-	{
-		if (!initialized)
-		{
-			Log.warn('IAP not initialized.');
-			return;
-		}
-
-		final querySubsProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySubsProductDetailsAsync',
-			'([Ljava/lang/String;)V');
-
-		if (querySubsProductDetailsJNI != null)
-			querySubsProductDetailsJNI(ids);
-	}
-
-	/**
 	 * Queries in-app purchases asynchronously.
 	 */
 	public static function queryInAppPurchasesAsync():Void
@@ -223,23 +174,6 @@ class IAPAndroid
 
 		if (queryInAppPurchasesJNI != null)
 			queryInAppPurchasesJNI();
-	}
-
-	/**
-	 * Queries subscription purchases asynchronously.
-	 */
-	public static function querySubsPurchasesAsync():Void
-	{
-		if (!initialized)
-		{
-			Log.warn('IAP not initialized.');
-			return;
-		}
-
-		final querySubsPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'querySubsPurchasesAsync', '()V');
-
-		if (querySubsPurchasesJNI != null)
-			querySubsPurchasesJNI();
 	}
 }
 
@@ -290,28 +224,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onQuerySubsPurchases(result:String):Void
-	{
-		final parsedResult:Dynamic = haxe.Json.parse(result);
-
-		if (parsedResult != null)
-		{
-			final purchases:Array<IAPPurchase> = [];
-
-			if (parsedResult.purchases != null)
-			{
-				for (purchase in (parsedResult.purchases : Array<Dynamic>))
-					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
-			}
-
-			IAPAndroid.onQuerySubsPurchases.dispatch(purchases);
-		}
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
 	public function onQueryInAppProductDetails(result:String):Void
 	{
 		final parsedResult:Dynamic = haxe.Json.parse(result);
@@ -327,28 +239,6 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 			}
 
 			IAPAndroid.onQueryInAppProductDetails.dispatch(productsDetails);
-		}
-	}
-
-	@:keep
-	#if (lime >= "8.0.0")
-	@:runOnMainThread
-	#end
-	public function onQuerySubsProductDetails(result:String):Void
-	{
-		final parsedResult:Dynamic = haxe.Json.parse(result);
-
-		if (parsedResult != null)
-		{
-			final productsDetails:Array<IAPProductDetails> = [];
-
-			if (parsedResult.purchases != null)
-			{
-				for (productDetails in (parsedResult.purchases : Array<Dynamic>))
-					productsDetails.push(new IAPProductDetails(productDetails));
-			}
-
-			IAPAndroid.onQuerySubsProductDetails.dispatch(productsDetails);
 		}
 	}
 

@@ -27,12 +27,6 @@ public class IAP extends Extension
 			mainActivity.runOnUiThread(() -> billingManager.initiatePurchaseFlow(productID));
 	}
 
-	public static void subscribe(final String productID)
-	{
-		if (billingManager != null)
-			mainActivity.runOnUiThread(() -> billingManager.initiateSubscriptionFlow(productID));
-	}
-
 	public static void consume(final String purchaseJson, final String signature)
 	{
 		try
@@ -77,22 +71,10 @@ public class IAP extends Extension
 			billingManager.queryInAppProductDetailsAsync(Arrays.asList(ids));
 	}
 
-	public static void querySubsProductDetailsAsync(String[] ids)
-	{
-		if (billingManager != null)
-			billingManager.querySubsProductDetailsAsync(Arrays.asList(ids));
-	}
-
 	public static void queryInAppPurchasesAsync()
 	{
 		if (billingManager != null)
 			billingManager.queryInAppPurchasesAsync();
-	}
-
-	public static void querySubsPurchasesAsync()
-	{
-		if (billingManager != null)
-			billingManager.querySubsPurchasesAsync();
 	}
 
 	@Override
@@ -152,39 +134,6 @@ public class IAP extends Extension
 			}
 		}
 
-		public void onQuerySubsPurchases(List<Purchase> subscriptionPurchases)
-		{
-			if (callback != null)
-			{
-				try
-				{
-					JSONArray purchasesArray = new JSONArray();
-
-					if (subscriptionPurchases != null)
-					{
-						for (Purchase purchase : subscriptionPurchases)
-						{
-							if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED)
-							{
-								JSONObject purchaseJson = new JSONObject();
-								purchaseJson.put("originalJson", new JSONObject(purchase.getOriginalJson()));
-								purchaseJson.put("signature", purchase.getSignature());
-								purchasesArray.put(purchaseJson);
-							}
-						}
-					}
-
-					JSONObject jsonResp = new JSONObject();
-					jsonResp.put("purchases", purchasesArray);
-					callback.call("onQuerySubsPurchases", new Object[] { jsonResp.toString() });
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-
 		public void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
 		{
 			if (callback != null)
@@ -205,34 +154,6 @@ public class IAP extends Extension
 					JSONObject jsonResp = new JSONObject();
 					jsonResp.put("products", productsArray);
 					callback.call("onQueryInAppProductDetails", new Object[] { jsonResp.toString() });
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-
-		public void onQuerySubsProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
-		{
-			if (callback != null)
-			{
-				try
-				{
-					JSONArray productsArray = new JSONArray();
-
-					if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-					{
-						if (productDetailsList != null)
-						{
-							for (ProductDetails product : productDetailsList)
-								productsArray.put(productDetailsToJson(product));
-						}
-					}
-
-					JSONObject jsonResp = new JSONObject();
-					jsonResp.put("products", productsArray);
-					callback.call("onQuerySubsProductDetails", new Object[] { jsonResp.toString() });
 				}
 				catch (Exception e)
 				{
@@ -311,45 +232,6 @@ public class IAP extends Extension
 					resultObject.put("formattedPrice", purchaseOfferDetails.getFormattedPrice());
 					resultObject.put("priceAmountMicros", purchaseOfferDetails.getPriceAmountMicros());
 					resultObject.put("priceCurrencyCode", purchaseOfferDetails.getPriceCurrencyCode());
-				}
-
-				List<ProductDetails.SubscriptionOfferDetails> subscriptionOfferDetailsList = productDetails.getSubscriptionOfferDetails();
-
-				if (subscriptionOfferDetailsList != null)
-				{
-					JSONArray offersArray = new JSONArray();
-
-					for (ProductDetails.SubscriptionOfferDetails offerDetails : subscriptionOfferDetailsList)
-					{
-						JSONObject offerJson = new JSONObject();
-
-						if (offerDetails.getOfferId() != null)
-							offerJson.put("offerId", offerDetails.getOfferId());
-
-						offerJson.put("basePlanId", offerDetails.getBasePlanId());
-						offerJson.put("offerTags", new JSONArray(offerDetails.getOfferTags()));
-						offerJson.put("offerToken", offerDetails.getOfferToken());
-
-						JSONArray pricingPhases = new JSONArray();
-
-						for (ProductDetails.PricingPhase pricingPhase : offerDetails.getPricingPhases().getPricingPhaseList())
-						{
-							JSONObject phaseJson = new JSONObject();
-							phaseJson.put("billingCycleCount", pricingPhase.getBillingCycleCount());
-							phaseJson.put("billingPeriod", pricingPhase.getBillingPeriod());
-							phaseJson.put("formattedPrice", pricingPhase.getFormattedPrice());
-							phaseJson.put("priceAmountMicros", pricingPhase.getPriceAmountMicros());
-							phaseJson.put("priceCurrencyCode", pricingPhase.getPriceCurrencyCode());
-							phaseJson.put("recurrenceMode", pricingPhase.getRecurrenceMode());
-							pricingPhases.put(phaseJson);
-						}
-
-						offerJson.put("pricingPhases", pricingPhases);
-
-						offersArray.put(offerJson);
-					}
-
-					resultObject.put("subscriptionOffers", offersArray);
 				}
 			}
 			catch (Exception e)

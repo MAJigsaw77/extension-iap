@@ -1,7 +1,5 @@
 package iap.android;
 
-import iap.android.IAPSubscriptionOffer;
-
 class IAPProductDetails
 {
 	public final productId:String;
@@ -13,8 +11,6 @@ class IAPProductDetails
 	public final priceAmountMicros:Float;
 	public final priceCurrencyCode:String;
 
-	public var subscriptionOffers(default, null):Array<IAPSubscriptionOffer> = [];
-
 	public function new(json:Dynamic):Void
 	{
 		productId = json.productId;
@@ -25,11 +21,5 @@ class IAPProductDetails
 		formattedPrice = json.formattedPrice;
 		priceAmountMicros = json.priceAmountMicros;
 		priceCurrencyCode = json.priceCurrencyCode;
-
-		if (json.subscriptionOffers != null)
-		{
-			for (offerJson in (json.subscriptionOffers : Array<Dynamic>))
-				subscriptionOffers.push(new IAPSubscriptionOffer(offerJson));
-		}
 	}
 }

@@ -10,9 +10,7 @@ public class BillingManager
 	private final BillingUpdatesListener mBillingUpdatesListener;
 	private final String mBase64EncodedPublicKey;
 	private final List<Purchase> mInAppPurchases = Collections.synchronizedList(new ArrayList<>());
-	private final List<Purchase> mSubscriptionPurchases = Collections.synchronizedList(new ArrayList<>());
 	private final Map<String, ProductDetails> mInAppProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
-	private final Map<String, ProductDetails> mSubscriptionProductDetailsMap = Collections.synchronizedMap(new HashMap<>());
 
 	private BillingClient mBillingClient;
 	private boolean mIsServiceConnected;
@@ -23,13 +21,8 @@ public class BillingManager
 	{
 		void onBillingClientSetup(Boolean success);
 		void onBillingClientDebugLog(String message);
-
 		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
-		void onQuerySubsPurchases(List<Purchase> subscriptionPurchases);
-
 		void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
-		void onQuerySubsProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
-
 		void onConsume(String token, BillingResult result);
 		void onAcknowledgePurchase(String token, BillingResult result);
 	}
@@ -54,11 +47,6 @@ public class BillingManager
 							mInAppPurchases.clear();
 						}
 
-						synchronized (mSubscriptionPurchases)
-						{
-							mSubscriptionPurchases.clear();
-						}
-
 						for (Purchase purchase : purchases)
 						{
 							if (verifyPurchase(purchase))
@@ -70,24 +58,12 @@ public class BillingManager
 										mInAppPurchases.add(purchase);
 									}
 								}
-								else if (purchase.getProducts().contains(BillingClient.ProductType.SUBS))
-								{
-									synchronized (mSubscriptionPurchases)
-									{
-										mSubscriptionPurchases.add(purchase);
-									}
-								}
 							}
 						}
 
 						synchronized (mInAppPurchases)
 						{
 							mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
-						}
-
-						synchronized (mSubscriptionPurchases)
-						{
-							mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
 						}
 					}
 					else
@@ -160,27 +136,6 @@ public class BillingManager
 		}
 	}
 
-	public void initiateSubscriptionFlow(final String productId)
-	{
-		try
-		{
-			final ProductDetails productDetail = mSubscriptionProductDetailsMap.get(productId);
-
-			if (productDetail == null)
-				querySubsProductDetailsAsync(Collections.singletonList(productId));
-			else
-			{
-				List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
-				productDetailsParamsList.add(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(productDetail).build());
-				mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder().setProductDetailsParamsList(productDetailsParamsList).build());
-			}
-		}
-		catch (Exception e)
-		{
-			mBillingUpdatesListener.onBillingClientDebugLog("Failed to initiate subscription flow: " + e.getMessage());
-		}
-	}
-
 	public void queryInAppProductDetailsAsync(final List<String> productList)
 	{
 		try
@@ -205,38 +160,6 @@ public class BillingManager
 		catch (Exception e)
 		{
 			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query INAPP product details: " + e.getMessage());
-		}
-	}
-
-	public void querySubsProductDetailsAsync(final List<String> productList)
-	{
-		try
-		{
-			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
-			{
-				List<QueryProductDetailsParams.Product> subsProductList = new ArrayList<>();
-
-				for (String productId : productList)
-					subsProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.SUBS).build());
-
-				mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build(), (billingResult, productDetailsList) -> {
-					mBillingUpdatesListener.onQuerySubsProductDetails(productDetailsList, billingResult);
-
-					if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
-					{
-						for (ProductDetails productDetails : productDetailsList)
-							mSubscriptionProductDetailsMap.put(productDetails.getProductId(), productDetails);
-					}
-					else
-						mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
-				});
-			}
-			else
-				mBillingUpdatesListener.onBillingClientDebugLog("Subscriptions feature is not supported.");
-		}
-		catch (Exception e)
-		{
-			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query SUBS product details: " + e.getMessage());
 		}
 	}
 
@@ -268,40 +191,6 @@ public class BillingManager
 		catch (Exception e)
 		{
 			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query INAPP purchases: " + e.getMessage());
-		}
-	}
-
-	public void querySubsPurchasesAsync()
-	{
-		try
-		{
-			if (mBillingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).getResponseCode() == BillingClient.BillingResponseCode.OK)
-			{
-				mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), new PurchasesResponseListener()
-				{
-					public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases)
-					{
-						if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
-						{
-							synchronized (mSubscriptionPurchases)
-							{
-								mSubscriptionPurchases.clear();
-
-								if (purchases != null)
-									mSubscriptionPurchases.addAll(purchases);
-
-								mBillingUpdatesListener.onQuerySubsPurchases(new ArrayList<>(mSubscriptionPurchases));
-							}
-						}
-						else
-							mBillingUpdatesListener.onBillingClientDebugLog(billingResult.getDebugMessage());
-					}
-				});
-			}
-		}
-		catch (Exception e)
-		{
-			mBillingUpdatesListener.onBillingClientDebugLog("Failed to query SUBS purchases: " + e.getMessage());
 		}
 	}
 
