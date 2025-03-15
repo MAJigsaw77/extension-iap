@@ -37,7 +37,7 @@ public class IAP extends Extension
 			{
 				consumeInProgress.put(purchase.getPurchaseToken(), purchase);
 
-				billingManager.consumeAsync(purchase.getPurchaseToken());
+				billingManager.consume(purchase.getPurchaseToken());
 			}
 		}
 		catch (Exception e)
@@ -65,16 +65,16 @@ public class IAP extends Extension
 		}
 	}
 
-	public static void queryInAppProductDetailsAsync(String[] ids)
+	public static void queryProductDetails(String[] ids)
 	{
 		if (billingManager != null)
-			billingManager.queryInAppProductDetailsAsync(Arrays.asList(ids));
+			billingManager.queryProductDetails(Arrays.asList(ids));
 	}
 
-	public static void queryInAppPurchasesAsync()
+	public static void queryPurchases()
 	{
 		if (billingManager != null)
-			billingManager.queryInAppPurchasesAsync();
+			billingManager.queryPurchases();
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class IAP extends Extension
 				callback.call("onDebugLog", new Object[] { message });
 		}
 
-		public void onQueryInAppPurchases(List<Purchase> inAppPurchases)
+		public void onQueryPurchases(List<Purchase> inAppPurchases)
 		{
 			if (callback != null)
 			{
@@ -125,7 +125,7 @@ public class IAP extends Extension
 
 					JSONObject jsonResp = new JSONObject();
 					jsonResp.put("purchases", purchasesArray);
-					callback.call("onQueryInAppPurchases", new Object[] { jsonResp.toString() });
+					callback.call("onQueryPurchases", new Object[] { jsonResp.toString() });
 				}
 				catch (Exception e)
 				{
@@ -134,7 +134,7 @@ public class IAP extends Extension
 			}
 		}
 
-		public void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
+		public void onQueryProductDetails(List<ProductDetails> productDetailsList, BillingResult result)
 		{
 			if (callback != null)
 			{
@@ -153,7 +153,7 @@ public class IAP extends Extension
 
 					JSONObject jsonResp = new JSONObject();
 					jsonResp.put("products", productsArray);
-					callback.call("onQueryInAppProductDetails", new Object[] { jsonResp.toString() });
+					callback.call("onQueryProductDetails", new Object[] { jsonResp.toString() });
 				}
 				catch (Exception e)
 				{

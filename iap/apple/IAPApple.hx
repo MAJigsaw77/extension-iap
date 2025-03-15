@@ -30,7 +30,7 @@ class IAPApple
 	 * Event dispatched when product details have been successfully queried.
 	 * @param result An array of IAPProductDetails objects representing the queried product details.
 	 */
-	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+	public static var onQueryProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
 
 	/**
 	 * Event dispatched when a purchase has been successfully completed.
@@ -167,7 +167,7 @@ class IAPApple
 			for (productDetails in (parsedProductsDetails : Array<Dynamic>))
 				productsDetails.push(new IAPProductDetails(productDetails));
 
-			IAPApple.onQueryInAppProductDetails.dispatch(productsDetails);
+			IAPApple.onQueryProductDetails.dispatch(productsDetails);
 		}
 	}
 

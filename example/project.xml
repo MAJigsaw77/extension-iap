@@ -7,7 +7,6 @@
 	<source path="source" />
 
 	<haxelib name="lime" />
-	<haxelib name="extension-androidtools" if="android" />
 	<haxelib name="extension-iap" />
 
 	<haxeflag name="-dce" value="full" />

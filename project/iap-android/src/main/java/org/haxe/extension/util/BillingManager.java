@@ -21,8 +21,8 @@ public class BillingManager
 	{
 		void onBillingClientSetup(Boolean success);
 		void onBillingClientDebugLog(String message);
-		void onQueryInAppPurchases(List<Purchase> inAppPurchases);
-		void onQueryInAppProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
+		void onQueryPurchases(List<Purchase> inAppPurchases);
+		void onQueryProductDetails(List<ProductDetails> productDetailsList, BillingResult result);
 		void onConsume(String token, BillingResult result);
 		void onAcknowledgePurchase(String token, BillingResult result);
 	}
@@ -63,7 +63,7 @@ public class BillingManager
 
 						synchronized (mInAppPurchases)
 						{
-							mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
+							mBillingUpdatesListener.onQueryPurchases(new ArrayList<>(mInAppPurchases));
 						}
 					}
 					else
@@ -122,7 +122,7 @@ public class BillingManager
 			final ProductDetails productDetail = mInAppProductDetailsMap.get(productId);
 
 			if (productDetail == null)
-				queryInAppProductDetailsAsync(Collections.singletonList(productId));
+				queryProductDetails(Collections.singletonList(productId));
 			else
 			{
 				List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
@@ -136,7 +136,7 @@ public class BillingManager
 		}
 	}
 
-	public void queryInAppProductDetailsAsync(final List<String> productList)
+	public void queryProductDetails(final List<String> productList)
 	{
 		try
 		{
@@ -146,7 +146,7 @@ public class BillingManager
 				inAppProductList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(productId).setProductType(BillingClient.ProductType.INAPP).build());
 
 			mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(inAppProductList).build(), (billingResult, productDetailsList) -> {
-				mBillingUpdatesListener.onQueryInAppProductDetails(productDetailsList, billingResult);
+				mBillingUpdatesListener.onQueryProductDetails(productDetailsList, billingResult);
 
 				if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
 				{
@@ -163,7 +163,7 @@ public class BillingManager
 		}
 	}
 
-	public void queryInAppPurchasesAsync()
+	public void queryPurchases()
 	{
 		try
 		{
@@ -180,7 +180,7 @@ public class BillingManager
 							if (purchases != null)
 								mInAppPurchases.addAll(purchases);
 
-							mBillingUpdatesListener.onQueryInAppPurchases(new ArrayList<>(mInAppPurchases));
+							mBillingUpdatesListener.onQueryPurchases(new ArrayList<>(mInAppPurchases));
 						}
 					}
 					else
@@ -194,7 +194,7 @@ public class BillingManager
 		}
 	}
 
-	public void consumeAsync(final String purchaseToken)
+	public void consume(final String purchaseToken)
 	{
 		synchronized (mTokensToBeConsumed)
 		{

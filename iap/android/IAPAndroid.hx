@@ -15,24 +15,28 @@ class IAPAndroid
 {
 	/**
 	 * Event dispatched on the IAP system initialization setup.
+	 * 
 	 * @param status A boolean indicating the initialization status.
 	 */
 	public static var onSetup(default, null):Event<Bool->Void> = new Event<Bool->Void>();
 
 	/**
 	 * Event dispatched when an debug log occurs during IAP processing.
+	 * 
 	 * @param message A string representing the message.
 	 */
 	public static var onDebugLog(default, null):Event<String->Void> = new Event<String->Void>();
 
 	/**
 	 * Event dispatched when a purchase is successfully consumed.
+	 * 
 	 * @param purchase The IAPPurchase object representing the consumed purchase.
 	 */
 	public static var onConsume(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 
 	/**
 	 * Event dispatched when consuming a purchase fails.
+	 * 
 	 * @param error A string representing the error message.
 	 * @param purchase The IAPPurchase object representing the purchase that failed to consume.
 	 */
@@ -40,12 +44,14 @@ class IAPAndroid
 
 	/**
 	 * Event dispatched when a purchase is successfully acknowledged.
+	 * 
 	 * @param purchase The IAPPurchase object representing the acknowledged purchase.
 	 */
 	public static var onAcknowledgePurchase(default, null):Event<IAPPurchase->Void> = new Event<IAPPurchase->Void>();
 
 	/**
 	 * Event dispatched when acknowledging a purchase fails.
+	 * 
 	 * @param error A string representing the error message.
 	 * @param purchase The IAPPurchase object representing the purchase that failed to acknowledge.
 	 */
@@ -53,21 +59,24 @@ class IAPAndroid
 
 	/**
 	 * Event dispatched when purchase details are finished being queried.
+	 * 
 	 * @param purchases An array of IAPPurchase objects representing the queried purchases.
 	 */
-	public static var onQueryInAppPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
+	public static var onQueryPurchases(default, null):Event<Array<IAPPurchase>->Void> = new Event<Array<IAPPurchase>->Void>();
 
 	/**
 	 * Event dispatched when product details are finished being queried.
+	 * 
 	 * @param result An array of IAPProductDetails objects representing the queried product details.
 	 */
-	public static var onQueryInAppProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
+	public static var onQueryProductDetails(default, null):Event<Array<IAPProductDetails>->Void> = new Event<Array<IAPProductDetails>->Void>();
 
 	@:noCompletion
 	private static var initialized:Bool = false;
 
 	/**
 	 * Initializes the IAP system with a public key for authentication.
+	 * 
 	 * @param publicKey The public key used for IAP authentication.
 	 */
 	public static function init(publicKey:String):Void
@@ -87,6 +96,7 @@ class IAPAndroid
 
 	/**
 	 * Initiates a purchase for a product.
+	 * 
 	 * @param productDetails The IAPProductDetails object representing the product to be purchased.
 	 */
 	public static function purchase(productDetails:IAPProductDetails):Void
@@ -105,6 +115,7 @@ class IAPAndroid
 
 	/**
 	 * Consumes a purchased product.
+	 * 
 	 * @param purchase The IAPPurchase object representing the purchase to be consumed.
 	 */
 	public static function consume(purchase:IAPPurchase):Void
@@ -123,6 +134,7 @@ class IAPAndroid
 
 	/**
 	 * Acknowledges a purchased product.
+	 * 
 	 * @param purchase The IAPPurchase object representing the purchase to be acknowledged.
 	 */
 	public static function acknowledgePurchase(purchase:IAPPurchase):Void
@@ -141,10 +153,11 @@ class IAPAndroid
 	}
 
 	/**
-	 * Queries product details asynchronously.
+	 * Queries product details.
+	 * 
 	 * @param ids An array of product IDs to query details for.
 	 */
-	public static function queryInAppProductDetailsAsync(ids:Array<String>):Void
+	public static function queryProductDetails(ids:Array<String>):Void
 	{
 		if (!initialized)
 		{
@@ -152,7 +165,7 @@ class IAPAndroid
 			return;
 		}
 
-		final queryInAppProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInAppProductDetailsAsync',
+		final queryInAppProductDetailsJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryProductDetails',
 			'([Ljava/lang/String;)V');
 
 		if (queryInAppProductDetailsJNI != null)
@@ -160,9 +173,9 @@ class IAPAndroid
 	}
 
 	/**
-	 * Queries in-app purchases asynchronously.
+	 * Queries purchases.
 	 */
-	public static function queryInAppPurchasesAsync():Void
+	public static function queryPurchases():Void
 	{
 		if (!initialized)
 		{
@@ -170,7 +183,7 @@ class IAPAndroid
 			return;
 		}
 
-		final queryInAppPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryInAppPurchasesAsync', '()V');
+		final queryInAppPurchasesJNI:Null<Dynamic> = JNICache.createStaticMethod('org/haxe/extension/IAP', 'queryPurchases', '()V');
 
 		if (queryInAppPurchasesJNI != null)
 			queryInAppPurchasesJNI();
@@ -202,7 +215,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onQueryInAppPurchases(result:String):Void
+	public function onQueryPurchases(result:String):Void
 	{
 		final parsedResult:Dynamic = haxe.Json.parse(result);
 
@@ -216,7 +229,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 					purchases.push(new IAPPurchase(purchase.originalJson, purchase.signature));
 			}
 
-			IAPAndroid.onQueryInAppPurchases.dispatch(purchases);
+			IAPAndroid.onQueryPurchases.dispatch(purchases);
 		}
 	}
 
@@ -224,7 +237,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 	#if (lime >= "8.0.0")
 	@:runOnMainThread
 	#end
-	public function onQueryInAppProductDetails(result:String):Void
+	public function onQueryProductDetails(result:String):Void
 	{
 		final parsedResult:Dynamic = haxe.Json.parse(result);
 
@@ -238,7 +251,7 @@ private class CallBackHandler #if (lime >= "8.0.0") implements lime.system.JNI.J
 					productsDetails.push(new IAPProductDetails(productDetails));
 			}
 
-			IAPAndroid.onQueryInAppProductDetails.dispatch(productsDetails);
+			IAPAndroid.onQueryProductDetails.dispatch(productsDetails);
 		}
 	}
 

@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -41,11 +42,13 @@ public class Security
 		catch (NoSuchAlgorithmException e)
 		{
 			Log.e(TAG, "NoSuchAlgorithmException.");
+
 			throw new RuntimeException(e);
 		}
 		catch (InvalidKeySpecException e)
 		{
 			Log.e(TAG, "Invalid key specification.");
+
 			throw new IllegalArgumentException(e);
 		}
 	}
@@ -54,7 +57,7 @@ public class Security
 	{
 		byte[] signatureBytes;
 
-		try 
+		try
 		{
 			signatureBytes = Base64.decode(signature, Base64.DEFAULT);
 		}
@@ -68,7 +71,7 @@ public class Security
 		{
 			Signature signatureAlgorithm = Signature.getInstance(SIGNATURE_ALGORITHM);
 			signatureAlgorithm.initVerify(publicKey);
-			signatureAlgorithm.update(signedData.getBytes());
+			signatureAlgorithm.update(signedData.getBytes(StandardCharsets.UTF_8));
 
 			if (!signatureAlgorithm.verify(signatureBytes))
 			{

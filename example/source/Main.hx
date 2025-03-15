@@ -11,119 +11,46 @@ class Main extends lime.app.Application
 		iap.IAP.onSetup.add(function(success:Bool):Void
 		{
 			if (success)
-			{
-				#if android
-				iap.IAP.queryInAppProductDetailsAsync(['gold_x_1k', 'gold_x_5k', 'gold_x_10k']);
-				iap.IAP.querySubsProductDetailsAsync(['testsubs']);
-				#else
 				iap.IAP.queryProductDetails(['idk']);
-				#end
-			}
 
-			#if android
-			android.widget.Toast.makeText(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!', android.widget.Toast.LENGTH_SHORT);
-			#else
 			lime.utils.Log.info(success ? 'IAP Successfully initialized!' : 'IAP Initialization Failure!');
-			#end
 		});
 		iap.IAP.onDebugLog.add(function(message:String):Void
 		{
-			#if android
-			android.widget.Toast.makeText(message, android.widget.Toast.LENGTH_SHORT);
-			#else
 			lime.utils.Log.info(message);
-			#end
 		});
+
 		#if android
-		iap.IAP.onQueryInAppPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
+		iap.IAP.onQueryPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
 		{
 			if (purchases != null && purchases.length > 0)
 			{
 				for (purchase in purchases)
 				{
-					#if android
-					android.widget.Toast.makeText('Purchase found: ${purchase.productId}', android.widget.Toast.LENGTH_SHORT);
-					#else
 					lime.utils.Log.info("Purchase found: " + purchase.productId);
-					#end
 				}
 			}
 			else
 			{
-				#if android
-				android.widget.Toast.makeText("No inapp purchases found.", android.widget.Toast.LENGTH_SHORT);
-				#else
-				lime.utils.Log.info("No inapp purchases found.");
-				#end
-			}
-		});
-		iap.IAP.onQuerySubsPurchases.add(function(purchases:Array<iap.android.IAPPurchase>):Void
-		{
-			if (purchases != null && purchases.length > 0)
-			{
-				for (purchase in purchases)
-				{
-					#if android
-					android.widget.Toast.makeText('Purchase found: ${purchase.productId}', android.widget.Toast.LENGTH_SHORT);
-					#else
-					lime.utils.Log.info("Purchase found: " + purchase.productId);
-					#end
-				}
-			}
-			else
-			{
-				#if android
-				android.widget.Toast.makeText("No subs purchases found.", android.widget.Toast.LENGTH_SHORT);
-				#else
-				lime.utils.Log.info("No subs purchases found.");
-				#end
-			}
-		});
-		iap.IAP.onQueryInAppProductDetails.add(function(products:Array<iap.android.IAPProductDetails>):Void
-		{
-			if (products != null && products.length > 0)
-			{
-				for (product in products)
-				{
-					#if android
-					android.widget.Toast.makeText('Product Details found: ${product.title}', android.widget.Toast.LENGTH_SHORT);
-					#else
-					lime.utils.Log.info("Product Details found: " + product.title);
-					#end
-				}
-			}
-			else
-			{
-				#if android
-				android.widget.Toast.makeText("No inapp products found.", android.widget.Toast.LENGTH_SHORT);
-				#else
-				lime.utils.Log.info("No inapp products found.");
-				#end
-			}
-		});
-		iap.IAP.onQuerySubsProductDetails.add(function(products:Array<iap.android.IAPProductDetails>):Void
-		{
-			if (products != null && products.length > 0)
-			{
-				for (product in products)
-				{
-					#if android
-					android.widget.Toast.makeText('Product Details found: ${product.title}', android.widget.Toast.LENGTH_SHORT);
-					#else
-					lime.utils.Log.info("Product Details found: " + product.title);
-					#end
-				}
-			}
-			else
-			{
-				#if android
-				android.widget.Toast.makeText("No subs products found.", android.widget.Toast.LENGTH_SHORT);
-				#else
-				lime.utils.Log.info("No subs products found.");
-				#end
+				lime.utils.Log.info("No purchases found.");
 			}
 		});
 		#end
+
+		iap.IAP.onQueryProductDetails.add(function(products:Array<iap.android.IAPProductDetails>):Void
+		{
+			if (products != null && products.length > 0)
+			{
+				for (product in products)
+				{
+					lime.utils.Log.info("Product Details found: " + product.title);
+				}
+			}
+			else
+			{
+				lime.utils.Log.info("No products found.");
+			}
+		});
 	}
 
 	public override function onWindowCreate():Void
